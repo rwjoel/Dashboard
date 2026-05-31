@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salvus Wealth Partners — Portfolio Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0f2744;--navym:#1a3a5c;--navyl:#2a5080;--gold:#c9a84c;--goldl:#e8c97a;--cream:#f8f5ef;--creamd:#ede8de;--slate:#4a5568;--slatel:#718096;--green:#2d6a4f;--greenbg:#d8f3dc;--red:#9b2335;--redbg:#fce4e4;--amber:#92400e;--amberbg:#fef3c7;--border:rgba(15,39,68,0.12);--shadow:0 2px 16px rgba(15,39,68,0.08);--rad:8px;--radlg:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--navy);min-height:100vh;font-size:14px}
+.app-hdr{background:var(--navy);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(201,168,76,0.3)}
+.brand{display:flex;align-items:center;gap:12px}
+.bmark{width:32px;height:32px;border:1.5px solid var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--gold)}
+.bname{font-family:'DM Serif Display',serif;font-size:17px;color:#fff}
+.bsub{font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:14px}
+.dot-live{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,0.5)}
+.dot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.asof{font-size:10px;color:rgba(255,255,255,0.3);font-family:'DM Mono',monospace}
+.upload-btn{padding:5px 12px;background:transparent;border:1px solid rgba(201,168,76,.5);border-radius:5px;color:var(--gold);font-size:11px;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.upload-btn:hover{background:rgba(201,168,76,.1);border-color:var(--gold)}
+.nav-tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 28px;display:flex;position:sticky;top:58px;z-index:99}
+.tab{padding:13px 18px;font-size:13px;font-weight:500;color:var(--slatel);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab:hover{color:var(--navym)}
+.tab.act{color:var(--navy);border-bottom-color:var(--gold)}
+.main{padding:24px 28px;max-width:1400px;margin:0 auto}
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin-bottom:22px}
+.sc{background:#fff;border-radius:var(--radlg);border:1px solid var(--border);padding:16px 18px;border-left:3px solid var(--gold)}
+.sc-lbl{font-size:10px;color:var(--slatel);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px}
+.sc-val{font-size:24px;font-family:'DM Serif Display',serif;color:var(--navy);line-height:1}
+.sc-val.g{color:var(--green)}.sc-val.r{color:var(--red)}.sc-val.a{color:var(--amber)}
+.sc-sub{font-size:10px;color:var(--slatel);margin-top:4px}
+.page{display:none}.page.act{display:block}
+.tbl-wrap{background:#fff;border-radius:var(--radlg);border:1px solid var(--border);overflow:auto;margin-bottom:22px;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:720px}
+thead tr{background:var(--navy)}
+thead th{padding:10px 12px;font-weight:500;font-size:10px;letter-spacing:.5px;text-transform:uppercase;text-align:left;color:#fff;white-space:nowrap}
+th.r,td.r{text-align:right}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:hover{background:rgba(15,39,68,.025)}
+tbody tr:last-child{border-bottom:none}
+td{padding:10px 12px;vertical-align:middle}
+.tk{font-weight:700;font-size:12px;color:var(--navym);font-family:'DM Mono',monospace}
+.ind{font-size:11px;color:var(--slatel)}
+.nm{font-size:11px;color:var(--slate);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mp{font-family:'DM Mono',monospace;font-size:11px;color:var(--navy)}
+.mf{font-family:'DM Mono',monospace;font-size:11px;color:var(--red);font-weight:700}
+.mna{font-family:'DM Mono',monospace;font-size:11px;color:var(--slatel)}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
+.bp{background:var(--greenbg);color:var(--green)}
+.bf{background:var(--redbg);color:var(--red)}
+.bw{background:var(--amberbg);color:var(--amber)}
+.bn{background:#e2e8f0;color:var(--slatel)}
+.fail-pills{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.fp{display:inline-block;padding:1px 6px;background:var(--redbg);border:1px solid rgba(155,35,53,.2);border-radius:3px;font-size:9px;color:var(--red)}
+.sb{width:56px;height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:5px}
+.sf{height:100%;border-radius:3px}
+.rnum{width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:monospace;flex-shrink:0}
+.rnum.top{background:var(--gold);color:var(--navy)}.rnum.good{background:var(--green)}
+.fbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.fbar select,.fbar input[type=text]{padding:6px 10px;border:1px solid var(--border);border-radius:5px;font-size:12px;background:#fff;color:var(--navy);font-family:'DM Sans',sans-serif}
+.fbar input[type=text]{width:140px}
+.flbl{font-size:11px;color:var(--slatel);white-space:nowrap}
+.run-btn{padding:7px 16px;background:var(--navy);color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:background .2s;margin-left:auto}
+.run-btn:hover{background:var(--navyl)}
+.sec-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:12px}
+.sec-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--navy)}
+.sec-sub{font-size:11px;color:var(--slatel);margin-top:2px}
+.crit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:22px}
+.cc{background:#fff;border-radius:var(--radlg);border:1px solid var(--border);padding:16px 18px}
+.cc-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--slatel);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.cr{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.cr-lbl{font-size:11px;color:var(--slate);flex:1;min-width:0}
+.cr input[type=range]{flex:1.2;accent-color:var(--navym)}
+.cr-v{font-size:11px;font-family:'DM Mono',monospace;color:var(--navy);min-width:46px;text-align:right}
+.tog{width:32px;height:18px;border-radius:9px;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;background:#cbd5e0}
+.tog.on{background:var(--navym)}
+.tog::after{content:'';position:absolute;width:12px;height:12px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s}
+.tog.on::after{left:17px}
+.opt-hdr{background:var(--navy);padding:16px 22px;display:flex;align-items:center;justify-content:space-between;border-radius:var(--radlg) var(--radlg) 0 0}
+.opt-title{font-family:'DM Serif Display',serif;font-size:19px;color:#fff}
+.opt-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px}
+.opt-score{font-family:'DM Serif Display',serif;font-size:30px;color:var(--gold)}
+.opt-score-lbl{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px}
+.opt-ctrl{padding:14px 22px;background:rgba(15,39,68,.025);border-bottom:1px solid var(--border);display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.ocg label{font-size:10px;color:var(--slatel);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.ocg input{width:68px;padding:5px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;color:var(--navy);font-family:'DM Mono',monospace}
+.data-note{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:var(--rad);padding:12px 16px;margin-bottom:18px;font-size:12px;color:var(--navy);line-height:1.6}
+.data-note strong{color:var(--amber)}
+.pager{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--slatel)}
+.pager button{padding:4px 10px;border:1px solid var(--border);border-radius:4px;background:#fff;color:var(--navy);cursor:pointer;font-size:11px}
+.pager button:disabled{opacity:.4;cursor:default}
+@media(max-width:680px){.main{padding:14px 16px}.nav-tabs{padding:0 14px;overflow-x:auto}.app-hdr{padding:0 14px}.sum-grid{grid-template-columns:repeat(2,1fr)}}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:rgba(15,39,68,.15);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="app-hdr">
+  <div class="brand">
+    <div class="bmark">SW</div>
+    <div><div class="bname">Salvus Wealth Partners</div><div class="bsub">Portfolio Intelligence Dashboard</div></div>
+  </div>
+  <div class="hdr-right">
+    <div class="dot-live"><div class="dot"></div><span id="universe-count">750 securities</span></div>
+    <div class="asof" id="asof-lbl">EOD via Massive API</div>
+    <span id="data-badge" style="font-size:10px;font-family:'DM Mono',monospace;color:#2d6a4f;background:rgba(216,243,220,0.2);padding:3px 9px;border-radius:4px;border:1px solid rgba(45,106,79,0.3)">Connecting…</span>
+    <button id="refresh-btn" class="upload-btn" onclick="refreshPrices()" style="background:rgba(201,168,76,0.1);border-color:var(--gold);color:var(--gold)">⟳ Refresh Prices</button>
+    <label class="upload-btn" for="csv-upload">⬆ Upload YCharts CSV</label>
+    <input type="file" id="csv-upload" accept=".csv" style="display:none" onchange="handleUpload(this)">
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <div class="tab act" onclick="showPage('portfolio',this)">Portfolio Compliance</div>
+  <div class="tab" onclick="showPage('screener',this)">Universe Screener</div>
+  <div class="tab" onclick="showPage('optimal',this)">Optimal Portfolio</div>
+  <div class="tab" onclick="showPage('criteria',this)">Criteria &amp; Weights</div>
+</div>
+
+<div class="main">
+
+<div class="sum-grid">
+  <div class="sc"><div class="sc-lbl">Holdings</div><div class="sc-val" id="s-h">22</div><div class="sc-sub">Current portfolio</div></div>
+  <div class="sc"><div class="sc-lbl">All-pass</div><div class="sc-val g" id="s-p">—</div><div class="sc-sub">Meet all criteria</div></div>
+  <div class="sc"><div class="sc-lbl">Flagged</div><div class="sc-val a" id="s-w">—</div><div class="sc-sub">1 issue</div></div>
+  <div class="sc"><div class="sc-lbl">Failing</div><div class="sc-val r" id="s-f">—</div><div class="sc-sub">2+ issues</div></div>
+  <div class="sc"><div class="sc-lbl">Avg yield</div><div class="sc-val" id="s-y">—</div><div class="sc-sub">Portfolio avg</div></div>
+  <div class="sc"><div class="sc-lbl">Universe</div><div class="sc-val" id="s-u">750</div><div class="sc-sub">Dividend payers</div></div>
+</div>
+
+<!-- PORTFOLIO PAGE -->
+<div class="page act" id="pg-portfolio">
+  <div class="sec-hdr">
+    <div><div class="sec-title">Portfolio Compliance</div><div class="sec-sub">22 current holdings vs. active criteria · red = failing threshold</div></div>
+    <div class="fbar" style="margin:0">
+      <select id="pf" onchange="renderPort()" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:5px;background:#fff">
+        <option value="all">All holdings</option>
+        <option value="fail">Failing only</option>
+        <option value="pass">Passing only</option>
+      </select>
+    </div>
+  </div>
+  <div class="data-note">
+    <strong>📡 Massive API (Free Basic):</strong> EOD close prices load automatically for all 22 holdings on page open. Fundamental data (P/E, FCF, D/E, Rev Growth) comes from your YCharts CSV — click <strong>⬆ Upload YCharts CSV</strong> to refresh. Use <strong>⟳ Refresh Prices</strong> to reload EOD data anytime.
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Ticker</th><th>Name</th><th>Industry</th>
+        <th class="r">EOD Price</th><th class="r">Chg %</th>
+        <th class="r">Div Yield</th><th class="r">P/E</th><th class="r">P/Book</th>
+        <th class="r">FCF Yld</th><th class="r">D/E</th><th class="r">Rev Gro</th><th class="r">NI Gro</th>
+        <th>Status</th><th>Issues</th>
+      </tr></thead>
+      <tbody id="port-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SCREENER PAGE -->
+<div class="page" id="pg-screener">
+  <div class="sec-hdr">
+    <div><div class="sec-title">Universe Screener</div><div class="sec-sub">750 Russell 3000 dividend payers · sorted by yield or composite score</div></div>
+  </div>
+  <div class="fbar">
+    <span class="flbl">Search:</span>
+    <input type="text" id="search-q" placeholder="Ticker or name…" oninput="renderScreener()">
+    <span class="flbl">Show:</span>
+    <select id="sf" onchange="renderScreener()">
+      <option value="all">All 750</option>
+      <option value="port">Portfolio only</option>
+      <option value="nonport">Not in portfolio</option>
+    </select>
+    <span class="flbl">Min yield:</span>
+    <select id="sy" onchange="renderScreener()">
+      <option value="0">Any</option>
+      <option value="2">2%+</option>
+      <option value="3">3%+</option>
+      <option value="4">4%+</option>
+      <option value="5">5%+</option>
+    </select>
+    <span class="flbl">Max yield:</span>
+    <select id="syx" onchange="renderScreener()">
+      <option value="99">Any</option>
+      <option value="8">Under 8%</option>
+      <option value="6">Under 6%</option>
+      <option value="5">Under 5%</option>
+    </select>
+    <span class="flbl">Sort:</span>
+    <select id="ssort" onchange="renderScreener()">
+      <option value="yld">Yield (high→low)</option>
+      <option value="yldAsc">Yield (low→high)</option>
+      <option value="az">Ticker A→Z</option>
+    </select>
+    <button class="run-btn" onclick="renderScreener()">Apply Filters</button>
+  </div>
+  <div id="screener-count" style="font-size:11px;color:var(--slatel);margin-bottom:10px"></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Ticker</th><th>Name / Company</th>
+        <th class="r">Div Yield</th><th class="r">P/E</th><th class="r">P/Book</th>
+        <th class="r">FCF Yld</th><th class="r">D/E</th><th class="r">Rev Gro</th>
+        <th>In Portfolio</th><th>Full Data</th>
+      </tr></thead>
+      <tbody id="screen-tbody"></tbody>
+    </table>
+  </div>
+  <div class="pager" id="screen-pager"></div>
+</div>
+
+<!-- OPTIMAL PAGE -->
+<div class="page" id="pg-optimal">
+  <div style="background:#fff;border-radius:var(--radlg);border:1px solid var(--border);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow)">
+    <div class="opt-hdr">
+      <div><div class="opt-title">Optimal Portfolio Builder</div><div class="opt-sub">Best candidates from 750-stock universe by yield + full-data scoring</div></div>
+      <div style="text-align:right"><div class="opt-score" id="os">—</div><div class="opt-score-lbl">Avg composite score</div></div>
+    </div>
+    <div class="opt-ctrl">
+      <div class="ocg"><label>Target # holdings</label><input type="number" id="on" value="20" min="5" max="50" oninput="buildOpt()"></div>
+      <div class="ocg"><label>Min yield %</label><input type="number" id="oy" value="2" min="0" max="10" step="0.5" oninput="buildOpt()"></div>
+      <div class="ocg"><label>Max yield %</label><input type="number" id="oyx" value="9" min="2" max="20" step="0.5" oninput="buildOpt()"></div>
+      <div class="ocg"><label>Max D/E (if known)</label><input type="number" id="ode" value="3" min="0" max="15" step="0.5" oninput="buildOpt()"></div>
+      <button class="run-btn" onclick="buildOpt()">Rebuild</button>
+    </div>
+    <div style="overflow:auto">
+      <table>
+        <thead><tr>
+          <th>Rank</th><th>Ticker</th><th>Name</th><th>Industry</th>
+          <th class="r">Score</th><th class="r">Div Yield</th><th class="r">P/E</th>
+          <th class="r">D/E</th><th class="r">Rev Gro</th><th class="r">Sug. Wt</th><th>Action</th>
+        </tr></thead>
+        <tbody id="opt-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div style="background:#fff;border-radius:var(--radlg);border:1px solid var(--border);padding:18px 22px">
+    <div style="font-family:'DM Serif Display',serif;font-size:17px;color:var(--navy);margin-bottom:12px">Holdings to reconsider</div>
+    <div id="remove-list"></div>
+  </div>
+</div>
+
+<!-- CRITERIA PAGE -->
+<div class="page" id="pg-criteria">
+  <div class="sec-hdr"><div><div class="sec-title">Screening Criteria &amp; Factor Weights</div><div class="sec-sub">Changes apply instantly across all tabs</div></div></div>
+  <div class="crit-grid">
+    <div class="cc">
+      <div class="cc-title">Income criteria</div>
+      <div class="cr"><span class="cr-lbl">Min dividend yield</span><input type="range" min="0" max="8" step=".25" id="c-yn" value="2" oninput="uc()"><span class="cr-v" id="cv-yn">2.00%</span><button class="tog on" id="ct-yn" onclick="tog(this,'yn')"></button></div>
+      <div class="cr"><span class="cr-lbl">Max dividend yield</span><input type="range" min="2" max="15" step=".25" id="c-yx" value="9" oninput="uc()"><span class="cr-v" id="cv-yx">9.00%</span><button class="tog on" id="ct-yx" onclick="tog(this,'yx')"></button></div>
+      <div class="cr"><span class="cr-lbl">Min FCF yield</span><input type="range" min="0" max="15" step=".5" id="c-fcf" value="2" oninput="uc()"><span class="cr-v" id="cv-fcf">2.0%</span><button class="tog on" id="ct-fcf" onclick="tog(this,'fcf')"></button></div>
+    </div>
+    <div class="cc">
+      <div class="cc-title">Valuation criteria</div>
+      <div class="cr"><span class="cr-lbl">Max P/E ratio</span><input type="range" min="5" max="60" step="1" id="c-pe" value="35" oninput="uc()"><span class="cr-v" id="cv-pe">35x</span><button class="tog on" id="ct-pe" onclick="tog(this,'pe')"></button></div>
+      <div class="cr"><span class="cr-lbl">Max P/Book</span><input type="range" min=".5" max="30" step=".5" id="c-pb" value="10" oninput="uc()"><span class="cr-v" id="cv-pb">10x</span><button class="tog on" id="ct-pb" onclick="tog(this,'pb')"></button></div>
+      <div class="cr"><span class="cr-lbl">Max PEG ratio</span><input type="range" min="0" max="5" step=".1" id="c-peg" value="2.5" oninput="uc()"><span class="cr-v" id="cv-peg">2.5x</span><button class="tog on" id="ct-peg" onclick="tog(this,'peg')"></button></div>
+    </div>
+    <div class="cc">
+      <div class="cc-title">Quality &amp; growth</div>
+      <div class="cr"><span class="cr-lbl">Max D/E ratio</span><input type="range" min="0" max="15" step=".25" id="c-de" value="3" oninput="uc()"><span class="cr-v" id="cv-de">3.00x</span><button class="tog on" id="ct-de" onclick="tog(this,'de')"></button></div>
+      <div class="cr"><span class="cr-lbl">Min rev growth</span><input type="range" min="-20" max="50" step="1" id="c-rv" value="0" oninput="uc()"><span class="cr-v" id="cv-rv">0%</span><button class="tog on" id="ct-rv" onclick="tog(this,'rv')"></button></div>
+      <div class="cr"><span class="cr-lbl">Min NI growth</span><input type="range" min="-200" max="200" step="5" id="c-ni" value="-50" oninput="uc()"><span class="cr-v" id="cv-ni">-50%</span><button class="tog on" id="ct-ni" onclick="tog(this,'ni')"></button></div>
+    </div>
+    <div class="cc">
+      <div class="cc-title">Factor weights <span id="wtot-badge" style="font-size:10px;font-weight:700;color:var(--green)">100% ✓</span></div>
+      <div class="cr"><span class="cr-lbl">Dividend yield</span><input type="range" min="0" max="40" step="1" id="w-y" value="25" oninput="uw()"><span class="cr-v" id="wv-y">25%</span></div>
+      <div class="cr"><span class="cr-lbl">FCF yield</span><input type="range" min="0" max="40" step="1" id="w-f" value="15" oninput="uw()"><span class="cr-v" id="wv-f">15%</span></div>
+      <div class="cr"><span class="cr-lbl">P/E (inverted)</span><input type="range" min="0" max="40" step="1" id="w-p" value="20" oninput="uw()"><span class="cr-v" id="wv-p">20%</span></div>
+      <div class="cr"><span class="cr-lbl">Revenue growth</span><input type="range" min="0" max="40" step="1" id="w-r" value="20" oninput="uw()"><span class="cr-v" id="wv-r">20%</span></div>
+      <div class="cr"><span class="cr-lbl">Balance sheet (D/E)</span><input type="range" min="0" max="40" step="1" id="w-d" value="20" oninput="uw()"><span class="cr-v" id="wv-d">20%</span></div>
+    </div>
+  </div>
+  <div style="background:#fff;border-radius:var(--radlg);border:1px solid var(--border);padding:18px 22px">
+    <div style="font-family:'DM Serif Display',serif;font-size:17px;margin-bottom:10px">How to get full data for all 750 securities</div>
+    <ol style="font-size:13px;color:var(--slate);line-height:2;padding-left:20px">
+      <li>In YCharts, open a Comp Table</li>
+      <li>Import the full ticker list from this universe (or paste your target list)</li>
+      <li>Add columns: P/E Ratio, Price to Book Value, Free Cash Flow Yield, Debt to Equity, Revenue (QoQ YoY Growth), Net Income (QoQ YoY Growth), PEG Ratio</li>
+      <li>Enable AutoUpdate, then export as CSV</li>
+      <li>Upload the CSV using the button in the top-right header</li>
+      <li>The dashboard will automatically detect and map all columns — all 750 scores will update instantly</li>
+    </ol>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+const RAW=[{"t":"ORC","name":"Orchid Island Capital, Inc.","yld":20.228,"p":0},{"t":"ALIT","name":"Alight, Inc.","yld":19.321,"p":0},{"t":"IVR","name":"Invesco Mortgage Capital, Inc.","yld":18.559,"p":0},{"t":"ABR","name":"Arbor Realty Trust, Inc.","yld":18.018,"p":0},{"t":"EMBC","name":"Embecta Corp.","yld":17.857,"p":0},{"t":"ARR","name":"ARMOUR Residential REIT, Inc.","yld":16.253,"p":0},{"t":"REFI","name":"Chicago Atlantic Real Estate Finance, Inc.","yld":16.235,"p":0},{"t":"SUNS","name":"Sunrise Realty Trust, Inc.","yld":16.194,"p":0},{"t":"KREF","name":"KKR Real Estate Finance Trust, Inc.","yld":15.456,"p":0},{"t":"DX","name":"Dynex Capital, Inc.","yld":15.258,"p":0},{"t":"RC","name":"Ready Capital Corp.","yld":15.254,"p":0},{"t":"MFA","name":"MFA Financial, Inc.","yld":14.953,"p":0},{"t":"PMT","name":"PennyMac Mortgage Investment Trust","yld":14.842,"p":0},{"t":"RWT","name":"Redwood Trust, Inc.","yld":13.508,"p":0},{"t":"AGNC","name":"AGNC Investment Corp.","yld":13.333,"p":0},{"t":"IIPR","name":"Innovative Industrial Properties, Inc.","yld":12.831,"p":0},{"t":"CCOI","name":"Cogent Communications Holdings, Inc.","yld":12.592,"p":0},{"t":"NLY","name":"Annaly Capital Management, Inc.","yld":12.478,"p":0},{"t":"FLO","name":"Flowers Foods, Inc.","yld":12.044,"p":0},{"t":"UWMC","name":"UWM Holdings Corp.","yld":12.012,"p":0},{"t":"NXDT","name":"NexPoint Diversified Real Estate Trust","yld":11.765,"p":0},{"t":"SPOK","name":"Spok Holdings, Inc.","yld":11.726,"p":0},{"t":"EFC","name":"Ellington Financial, Inc.","yld":11.59,"p":0},{"t":"VTS","name":"Vitesse Energy, Inc.","yld":11.536,"p":0},{"t":"TRTX","name":"TPG RE Finance Trust, Inc.","yld":11.415,"p":0},{"t":"TWO","name":"Two Harbors Investment Corp.","yld":11.173,"p":0},{"t":"STWD","name":"Starwood Property Trust, Inc.","yld":11.143,"p":0},{"t":"WHR","name":"Whirlpool Corp.","yld":10.832,"p":0},{"t":"MRP","name":"Millrose Properties, Inc.","yld":10.736,"p":0},{"t":"PLTK","name":"Playtika Holding Corp.","yld":10.667,"p":0},{"t":"WU","name":"The Western Union Co.","yld":10.479,"p":0},{"t":"PRGO","name":"Perrigo Co. Plc","yld":10.479,"p":0},{"t":"RITM","name":"Rithm Capital Corp.","yld":10.309,"p":0},{"t":"ADAM","name":"Adamas Trust, Inc.","yld":10.277,"p":0},{"t":"BXMT","name":"Blackstone Mortgage Trust, Inc.","yld":10.251,"p":0},{"t":"AMBP","name":"Ardagh Metal Packaging SA","yld":10.076,"p":0},{"t":"FMC","name":"FMC Corp.","yld":10.069,"p":0},{"t":"CAG","name":"Conagra Brands, Inc.","yld":10.05,"p":0},{"t":"EPM","name":"Evolution Petroleum Corp.","yld":10.042,"p":0},{"t":"GOOD","name":"Gladstone Commercial Corp.","yld":9.577,"p":0},{"t":"FBRT","name":"Franklin BSP Realty Trust, Inc.","yld":9.444,"p":0},{"t":"CIM","name":"Chimera Investment Corp.","yld":9.402,"p":0},{"t":"RMR","name":"The RMR Group, Inc.","yld":9.217,"p":0},{"t":"FLNG","name":"FLEX LNG Ltd.","yld":9.172,"p":0},{"t":"ARI","name":"Apollo Commercial Real Estate Finance, Inc.","yld":9.124,"p":0},{"t":"LADR","name":"Ladder Capital Corp.","yld":9.109,"p":0},{"t":"PK","name":"Park Hotels & Resorts, Inc.","yld":9.066,"p":0},{"t":"CHCT","name":"Community Healthcare Trust, Inc.","yld":9.039,"p":0},{"t":"OWL","name":"Blue Owl Capital, Inc.","yld":8.929,"p":0},{"t":"RHI","name":"Robert Half, Inc.","yld":8.892,"p":0},{"t":"ARE","name":"Alexandria Real Estate Equities, Inc.","yld":8.87,"p":0},{"t":"UPBD","name":"Upbound Group, Inc.","yld":8.672,"p":0},{"t":"GRNT","name":"Granite Ridge Resources, Inc.","yld":8.381,"p":0},{"t":"WEN","name":"The Wendy's Co.","yld":8.284,"p":0},{"t":"BLMN","name":"Bloomin' Brands, Inc.","yld":8.244,"p":0},{"t":"XRN","name":"Chiron Real Estate, Inc.","yld":8.199,"p":0},{"t":"SSTK","name":"Shutterstock, Inc.","yld":8.147,"p":0},{"t":"APAM","name":"Artisan Partners Asset Management, Inc.","yld":8.11,"p":1,"i":"Capital Markets","pe":9.8,"pb":6.89,"fcf":16.9,"de":0.8,"rev":2.5,"ni":-14.7},{"t":"NAT","name":"Nordic American Tankers Ltd.","yld":8.076,"p":0},{"t":"ETD","name":"Ethan Allen Interiors, Inc.","yld":7.947,"p":0},{"t":"OMF","name":"OneMain Holdings, Inc.","yld":7.88,"p":0},{"t":"DEA","name":"Easterly Government Properties, Inc.","yld":7.877,"p":0},{"t":"HIW","name":"Highwoods Properties, Inc.","yld":7.871,"p":0},{"t":"NAVI","name":"Navient Corp.","yld":7.692,"p":0},{"t":"ACCO","name":"ACCO Brands Corp.","yld":7.653,"p":0},{"t":"OLP","name":"One Liberty Properties, Inc.","yld":7.63,"p":0},{"t":"NOG","name":"Northern Oil & Gas, Inc.","yld":7.617,"p":0},{"t":"TFSL","name":"TFS Financial Corp.","yld":7.599,"p":0},{"t":"CPB","name":"The Campbell's Co.","yld":7.562,"p":0},{"t":"BGS","name":"B&G Foods, Inc.","yld":7.466,"p":0},{"t":"NSP","name":"Insperity, Inc.","yld":7.401,"p":0},{"t":"CWH","name":"Camping World Holdings, Inc.","yld":7.397,"p":0},{"t":"DEC","name":"Diversified Energy Co.","yld":7.384,"p":0},{"t":"UHT","name":"Universal Health Realty Income Trust","yld":7.361,"p":0},{"t":"GTN","name":"Gray Media, Inc.","yld":7.306,"p":0},{"t":"SFL","name":"SFL Corp. Ltd.","yld":7.25,"p":0},{"t":"CTO","name":"CTO Realty Growth, Inc.","yld":7.226,"p":0},{"t":"GIS","name":"General Mills, Inc.","yld":7.219,"p":0},{"t":"MTN","name":"Vail Resorts, Inc.","yld":7.179,"p":0},{"t":"WASH","name":"Washington Trust Bancorp, Inc.","yld":7.086,"p":0},{"t":"FFIC","name":"Flushing Financial Corp.","yld":7.069,"p":0},{"t":"PGR","name":"Progressive Corp.","yld":7.059,"p":0},{"t":"NXRT","name":"NexPoint Residential Trust, Inc.","yld":7.032,"p":0},{"t":"SBGI","name":"Sinclair, Inc.","yld":7.008,"p":0},{"t":"NEWT","name":"NewtekOne, Inc.","yld":6.955,"p":0},{"t":"APLE","name":"Apple Hospitality REIT, Inc.","yld":6.94,"p":0},{"t":"KHC","name":"The Kraft Heinz Co.","yld":6.879,"p":0},{"t":"NWL","name":"Newell Brands, Inc.","yld":6.863,"p":0},{"t":"ENR","name":"Energizer Holdings, Inc.","yld":6.826,"p":0},{"t":"RLJ","name":"RLJ Lodging Trust","yld":6.818,"p":0},{"t":"MPT","name":"Medical Properties Trust, Inc.","yld":6.746,"p":0},{"t":"MNRO","name":"Monro, Inc.","yld":6.675,"p":0},{"t":"PFE","name":"Pfizer Inc.","yld":6.664,"p":0},{"t":"BRSL","name":"Brightstar Lottery Plc","yld":6.656,"p":0},{"t":"VRTS","name":"Virtus Investment Partners, Inc.","yld":6.622,"p":0},{"t":"KNTK","name":"Kinetik Holdings, Inc.","yld":6.62,"p":0},{"t":"BBY","name":"Best Buy Co., Inc.","yld":6.612,"p":0},{"t":"UPS","name":"United Parcel Service, Inc.","yld":6.56,"p":0},{"t":"LYB","name":"LyondellBasell Industries NV","yld":6.528,"p":0},{"t":"AAT","name":"American Assets Trust, Inc.","yld":6.482,"p":0},{"t":"SXC","name":"SunCoke Energy, Inc.","yld":6.426,"p":0},{"t":"RGP","name":"Resources Connection, Inc.","yld":6.422,"p":0},{"t":"AMCR","name":"Amcor Plc","yld":6.406,"p":0},{"t":"CALM","name":"Cal-Maine Foods, Inc.","yld":6.382,"p":0},{"t":"GLPI","name":"Gaming & Leisure Properties, Inc.","yld":6.34,"p":0},{"t":"OXM","name":"Oxford Industries, Inc.","yld":6.34,"p":0},{"t":"MOV","name":"Movado Group, Inc.","yld":6.338,"p":0},{"t":"KRC","name":"Kilroy Realty Corp.","yld":6.305,"p":0},{"t":"DOC","name":"Healthpeak Properties, Inc.","yld":6.174,"p":0},{"t":"ACRE","name":"Ares Commercial Real Estate Corp.","yld":6.173,"p":0},{"t":"VICI","name":"VICI Properties, Inc.","yld":6.164,"p":0},{"t":"MO","name":"Altria Group, Inc.","yld":6.122,"p":1,"i":"Tobacco","pe":14.4,"fcf":7.48,"de":-7.66,"rev":5.3,"ni":103.2},{"t":"UVV","name":"Universal Corp.","yld":6.119,"p":0},{"t":"HVT","name":"Haverty Furniture Cos., Inc.","yld":6.115,"p":0},{"t":"FMNB","name":"Farmers National Banc Corp.","yld":6.08,"p":0},{"t":"CNXC","name":"Concentrix Corp.","yld":6.079,"p":0},{"t":"SLG","name":"SL Green Realty Corp.","yld":6.055,"p":0},{"t":"LAND","name":"Gladstone Land Corp.","yld":5.936,"p":0},{"t":"LTC","name":"LTC Properties, Inc.","yld":5.928,"p":0},{"t":"INN","name":"Summit Hotel Properties, Inc.","yld":5.926,"p":0},{"t":"XRAY","name":"Dentsply Sirona, Inc.","yld":5.866,"p":0},{"t":"VZ","name":"Verizon Communications, Inc.","yld":5.854,"p":1,"i":"Telecom","pe":11.5,"pb":1.91,"fcf":9.93,"de":1.9,"rev":2.9,"ni":3.3},{"t":"NWBI","name":"Northwest Bancshares, Inc. (Pennsylvania)","yld":5.839,"p":0},{"t":"SBRA","name":"Sabra Health Care REIT, Inc.","yld":5.803,"p":0},{"t":"GTY","name":"Getty Realty Corp.","yld":5.788,"p":0},{"t":"UMH","name":"UMH Properties, Inc.","yld":5.78,"p":0},{"t":"HRL","name":"Hormel Foods Corp.","yld":5.779,"p":0},{"t":"OHI","name":"Omega Healthcare Investors, Inc.","yld":5.701,"p":0},{"t":"IP","name":"International Paper Co.","yld":5.698,"p":0},{"t":"ALX","name":"Alexander's, Inc.","yld":5.64,"p":0},{"t":"FCPT","name":"Four Corners Property Trust, Inc.","yld":5.598,"p":0},{"t":"CLX","name":"The Clorox Co.","yld":5.579,"p":0},{"t":"KRNY","name":"Kearny Financial Corp.","yld":5.556,"p":0},{"t":"PZZA","name":"Papa John's International, Inc.","yld":5.512,"p":0},{"t":"BRSP","name":"BrightSpire Capital, Inc.","yld":5.498,"p":0},{"t":"HPQ","name":"HP, Inc.","yld":5.44,"p":0},{"t":"NNN","name":"NNN REIT, Inc.","yld":5.418,"p":0},{"t":"PRU","name":"Prudential Financial, Inc.","yld":5.39,"p":0},{"t":"LINE","name":"Lineage, Inc.","yld":5.379,"p":0},{"t":"EPR","name":"EPR Properties","yld":5.372,"p":0},{"t":"FIBK","name":"First Interstate BancSystem, Inc.","yld":5.356,"p":0},{"t":"COLD","name":"Americold Realty Trust, Inc.","yld":5.328,"p":0},{"t":"CZNC","name":"Citizens & Northern Corp.","yld":5.321,"p":0},{"t":"LXP","name":"LXP Industrial Trust","yld":5.308,"p":0},{"t":"RYN","name":"Rayonier, Inc.","yld":5.305,"p":0},{"t":"KMB","name":"Kimberly-Clark Corp.","yld":5.285,"p":0},{"t":"BDN","name":"Brandywine Realty Trust","yld":5.263,"p":0},{"t":"AESI","name":"Atlas Energy Solutions, Inc.","yld":5.255,"p":0},{"t":"SILA","name":"Sila Realty Trust, Inc.","yld":5.237,"p":0},{"t":"DHT","name":"DHT Holdings, Inc.","yld":5.232,"p":0},{"t":"BXP","name":"BXP, Inc.","yld":5.226,"p":0},{"t":"NSA","name":"National Storage Affiliates Trust","yld":5.223,"p":0},{"t":"AMSF","name":"AMERISAFE, Inc.","yld":5.221,"p":0},{"t":"FNLC","name":"The First Bancorp, Inc. (Maine)","yld":5.197,"p":0},{"t":"O","name":"Realty Income Corp.","yld":5.188,"p":0},{"t":"LNC","name":"Lincoln National Corp.","yld":5.177,"p":0},{"t":"SAFT","name":"Safety Insurance Group, Inc.","yld":5.166,"p":0},{"t":"TPG","name":"TPG, Inc.","yld":5.139,"p":0},{"t":"CMCSA","name":"Comcast Corp.","yld":5.107,"p":0},{"t":"PAX","name":"Patria Investments Ltd.","yld":5.106,"p":0},{"t":"WD","name":"Walker & Dunlop, Inc.","yld":4.999,"p":0},{"t":"NHI","name":"National Health Investors, Inc.","yld":4.984,"p":0},{"t":"F","name":"Ford Motor Co.","yld":4.979,"p":0},{"t":"MAN","name":"ManpowerGroup, Inc.","yld":4.974,"p":0},{"t":"COLB","name":"Columbia Banking System, Inc.","yld":4.963,"p":0},{"t":"BLX","name":"Banco Latinoamericano de Comercio Exterior SA","yld":4.958,"p":0},{"t":"SMA","name":"SmartStop Self Storage REIT, Inc.","yld":4.949,"p":0},{"t":"WPC","name":"W.P. Carey, Inc.","yld":4.943,"p":0},{"t":"EBF","name":"Ennis, Inc.","yld":4.921,"p":0},{"t":"AES","name":"The AES Corp.","yld":4.904,"p":0},{"t":"PEBO","name":"Peoples Bancorp, Inc. (Ohio)","yld":4.896,"p":0},{"t":"BCBP","name":"BCB Bancorp, Inc.","yld":4.893,"p":0},{"t":"TROW","name":"T. Rowe Price Group, Inc.","yld":4.878,"p":0},{"t":"CUBE","name":"CubeSmart","yld":4.846,"p":0},{"t":"MLKN","name":"MillerKnoll, Inc.","yld":4.832,"p":0},{"t":"EIX","name":"Edison International","yld":4.831,"p":0},{"t":"AVA","name":"Avista Corp.","yld":4.824,"p":0},{"t":"KVUE","name":"Kenvue, Inc.","yld":4.82,"p":0},{"t":"DIN","name":"Dine Brands Global, Inc.","yld":4.816,"p":0},{"t":"REXR","name":"Rexford Industrial Realty, Inc.","yld":4.806,"p":0},{"t":"HR","name":"Healthcare Realty Trust, Inc.","yld":4.793,"p":0},{"t":"OKE","name":"ONEOK, Inc.","yld":4.784,"p":0},{"t":"OFLX","name":"Omega Flex, Inc.","yld":4.717,"p":0},{"t":"MAA","name":"Mid-America Apartment Communities, Inc.","yld":4.695,"p":0},{"t":"CCI","name":"Crown Castle, Inc.","yld":4.687,"p":0},{"t":"CWEN","name":"Clearway Energy, Inc.","yld":4.666,"p":0},{"t":"SAFE","name":"Safehold, Inc.","yld":4.655,"p":0},{"t":"DLX","name":"Deluxe Corp.","yld":4.651,"p":0},{"t":"UDR","name":"UDR, Inc.","yld":4.643,"p":0},{"t":"HCKT","name":"The Hackett Group, Inc.","yld":4.629,"p":0},{"t":"UGI","name":"UGI Corp.","yld":4.623,"p":0},{"t":"MSBI","name":"Midland States Bancorp, Inc.","yld":4.613,"p":0},{"t":"HOPE","name":"Hope Bancorp, Inc.","yld":4.613,"p":0},{"t":"PAYX","name":"Paychex, Inc.","yld":4.602,"p":1,"i":"Professional Svcs","pe":20.7,"pb":8.37,"fcf":5.98,"de":1.25,"rev":19.9,"ni":7.9},{"t":"CRCT","name":"Cricut, Inc.","yld":4.587,"p":0},{"t":"JBGS","name":"JBG SMITH Properties","yld":4.581,"p":0},{"t":"MATV","name":"Mativ Holdings, Inc.","yld":4.571,"p":0},{"t":"TAP","name":"Molson Coors Beverage Co.","yld":4.561,"p":0},{"t":"WGO","name":"Winnebago Industries, Inc.","yld":4.559,"p":0},{"t":"HUN","name":"Huntsman Corp.","yld":4.548,"p":0},{"t":"REPX","name":"Riley Exploration Permian, Inc.","yld":4.546,"p":0},{"t":"CSR","name":"Centerspace","yld":4.535,"p":0},{"t":"HRB","name":"H&R Block, Inc.","yld":4.534,"p":0},{"t":"ES","name":"Eversource Energy","yld":4.529,"p":0},{"t":"JJSF","name":"J&J Snack Foods Corp.","yld":4.519,"p":0},{"t":"DOW","name":"Dow, Inc.","yld":4.515,"p":0},{"t":"BMY","name":"Bristol Myers Squibb Co.","yld":4.491,"p":0},{"t":"EXR","name":"Extra Space Storage, Inc.","yld":4.482,"p":0},{"t":"WSBC","name":"WesBanco, Inc.","yld":4.48,"p":0},{"t":"EMN","name":"Eastman Chemical Co.","yld":4.475,"p":0},{"t":"T","name":"AT&T, Inc.","yld":4.463,"p":1,"i":"Telecom","pe":8.35,"pb":1.58,"fcf":9.78,"de":1.43,"rev":2.9,"ni":-10.1},{"t":"JAKK","name":"JAKKS Pacific, Inc.","yld":4.44,"p":0},{"t":"WNC","name":"Wabash National Corp.","yld":4.438,"p":0},{"t":"BIPC","name":"Brookfield Infrastructure Corp.","yld":4.416,"p":0},{"t":"SJM","name":"The J. M. Smucker Co.","yld":4.414,"p":0},{"t":"BNL","name":"Broadstone Net Lease, Inc.","yld":4.41,"p":0},{"t":"SBSI","name":"Southside Bancshares, Inc.","yld":4.405,"p":0},{"t":"SMG","name":"Scotts Miracle-Gro Co.","yld":4.398,"p":0},{"t":"CFFN","name":"Capitol Federal Financial, Inc.","yld":4.376,"p":0},{"t":"SLVM","name":"Sylvamo Corp.","yld":4.372,"p":0},{"t":"OCFC","name":"OceanFirst Financial Corp.","yld":4.369,"p":0},{"t":"KW","name":"Kennedy-Wilson Holdings, Inc.","yld":4.352,"p":0},{"t":"LAZ","name":"Lazard, Inc.","yld":4.35,"p":0},{"t":"KIM","name":"Kimco Realty Corp.","yld":4.346,"p":0},{"t":"PFS","name":"Provident Financial Services, Inc.","yld":4.346,"p":0},{"t":"POR","name":"Portland General Electric Co.","yld":4.342,"p":0},{"t":"TFC","name":"Truist Financial Corp.","yld":4.336,"p":0},{"t":"BFS","name":"Saul Centers, Inc.","yld":4.326,"p":0},{"t":"RHP","name":"Ryman Hospitality Properties, Inc.","yld":4.324,"p":0},{"t":"PFIS","name":"Peoples Financial Services Corp.","yld":4.322,"p":0},{"t":"DGICA","name":"Donegal Group, Inc.","yld":4.317,"p":0},{"t":"CNA","name":"CNA Financial Corp.","yld":4.312,"p":0},{"t":"GPK","name":"Graphic Packaging Holding Co.","yld":4.305,"p":0},{"t":"SPG","name":"Simon Property Group, Inc.","yld":4.304,"p":0},{"t":"LKQ","name":"LKQ Corp.","yld":4.27,"p":0},{"t":"D","name":"Dominion Energy, Inc.","yld":4.268,"p":0},{"t":"WTBA","name":"West Bancorporation, Inc.","yld":4.266,"p":0},{"t":"SW","name":"Smurfit WestRock Plc","yld":4.266,"p":0},{"t":"REYN","name":"Reynolds Consumer Products, Inc.","yld":4.259,"p":0},{"t":"VAC","name":"Marriott Vacations Worldwide Corp.","yld":4.229,"p":0},{"t":"AM","name":"Antero Midstream Corp.","yld":4.223,"p":0},{"t":"EQR","name":"Equity Residential","yld":4.201,"p":0},{"t":"KRG","name":"Kite Realty Group Trust","yld":4.2,"p":0},{"t":"NVEC","name":"NVE Corp.","yld":4.199,"p":0},{"t":"HNI","name":"HNI Corp.","yld":4.192,"p":0},{"t":"SWK","name":"Stanley Black & Decker, Inc.","yld":4.186,"p":0},{"t":"SFD","name":"Smithfield Foods, Inc.","yld":4.176,"p":0},{"t":"BBWI","name":"Bath & Body Works, Inc.","yld":4.175,"p":0},{"t":"SON","name":"Sonoco Products Co.","yld":4.171,"p":0},{"t":"GNL","name":"Global Net Lease, Inc.","yld":4.167,"p":0},{"t":"PSTL","name":"Postal Realty Trust, Inc.","yld":4.165,"p":0},{"t":"NTST","name":"NetSTREIT Corp.","yld":4.155,"p":0},{"t":"KMPR","name":"Kemper Corp.","yld":4.154,"p":0},{"t":"FNF","name":"Fidelity National Financial, Inc.","yld":4.15,"p":0},{"t":"OSPN","name":"OneSpan, Inc.","yld":4.138,"p":0},{"t":"IRT","name":"Independence Realty Trust, Inc.","yld":4.134,"p":0},{"t":"EGY","name":"VAALCO Energy, Inc.","yld":4.125,"p":0},{"t":"BEN","name":"Franklin Resources, Inc.","yld":4.12,"p":0},{"t":"ATNI","name":"ATN International, Inc.","yld":4.12,"p":0},{"t":"CNNE","name":"Cannae Holdings, Inc.","yld":4.118,"p":0},{"t":"HASI","name":"HA Sustainable Infrastructure Capital, Inc.","yld":4.112,"p":0},{"t":"PAGS","name":"PagSeguro Digital Ltd.","yld":4.107,"p":0},{"t":"LAMR","name":"Lamar Advertising Co.","yld":4.105,"p":0},{"t":"GPC","name":"Genuine Parts Co.","yld":4.094,"p":0},{"t":"BX","name":"Blackstone, Inc.","yld":4.094,"p":0},{"t":"INVH","name":"Invitation Homes, Inc.","yld":4.08,"p":0},{"t":"MC","name":"Moelis & Co.","yld":4.072,"p":0},{"t":"SFNC","name":"Simmons First National Corp.","yld":4.069,"p":0},{"t":"LCII","name":"LCI Industries","yld":4.066,"p":0},{"t":"PII","name":"Polaris Inc.","yld":4.059,"p":0},{"t":"GCMG","name":"GCM Grosvenor, Inc.","yld":4.049,"p":0},{"t":"BEPC","name":"Brookfield Renewable Corp.","yld":4.048,"p":0},{"t":"FE","name":"FirstEnergy Corp.","yld":4.036,"p":0},{"t":"SWKS","name":"Skyworks Solutions, Inc.","yld":4.035,"p":0},{"t":"SIRI","name":"SiriusXM Holdings, Inc.","yld":4.032,"p":0},{"t":"CPT","name":"Camden Property Trust","yld":4.013,"p":0},{"t":"CUZ","name":"Cousins Properties, Inc.","yld":4.01,"p":0},{"t":"OMC","name":"Omnicom Group, Inc.","yld":3.992,"p":0},{"t":"BRX","name":"Brixmor Property Group, Inc.","yld":3.988,"p":0},{"t":"CVBF","name":"CVB Financial Corp.","yld":3.98,"p":0},{"t":"HY","name":"Hyster-Yale, Inc.","yld":3.955,"p":0},{"t":"M","name":"Macy's, Inc.","yld":3.952,"p":0},{"t":"MKC","name":"McCormick & Co., Inc.","yld":3.952,"p":0},{"t":"NE","name":"Noble Corp. Plc","yld":3.921,"p":0},{"t":"STAG","name":"STAG Industrial, Inc.","yld":3.903,"p":0},{"t":"NWN","name":"Northwest Natural Holding Co.","yld":3.899,"p":0},{"t":"RF","name":"Regions Financial Corp.","yld":3.895,"p":0},{"t":"ACI","name":"Albertsons Cos., Inc.","yld":3.894,"p":0},{"t":"EPRT","name":"Essential Properties Realty Trust, Inc.","yld":3.891,"p":0},{"t":"BMRC","name":"Bank of Marin Bancorp","yld":3.891,"p":0},{"t":"FRT","name":"Federal Realty Investment Trust","yld":3.89,"p":0},{"t":"FHB","name":"First Hawaiian, Inc.","yld":3.886,"p":0},{"t":"HBAN","name":"Huntington Bancshares, Inc.","yld":3.885,"p":0},{"t":"BUSE","name":"First Busey Corp.","yld":3.884,"p":0},{"t":"AMT","name":"American Tower Corp.","yld":3.882,"p":1,"i":"Specialized REITs","pe":28.7,"pb":23.5,"fcf":4.52,"de":12.8,"rev":6.8,"ni":76.2},{"t":"FIS","name":"Fidelity National Information Services, Inc.","yld":3.872,"p":0},{"t":"PSA","name":"Public Storage","yld":3.852,"p":0},{"t":"KEY","name":"KeyCorp","yld":3.848,"p":0},{"t":"CRGY","name":"Crescent Energy Co.","yld":3.843,"p":0},{"t":"AUB","name":"Atlantic Union Bankshares Corp.","yld":3.839,"p":0},{"t":"AMH","name":"American Homes 4 Rent","yld":3.838,"p":0},{"t":"TGT","name":"Target Corp.","yld":3.833,"p":0},{"t":"CDP","name":"COPT Defense Properties","yld":3.833,"p":0},{"t":"ESS","name":"Essex Property Trust, Inc.","yld":3.832,"p":0},{"t":"OZK","name":"Bank OZK","yld":3.827,"p":0},{"t":"NKE","name":"NIKE, Inc.","yld":3.822,"p":0},{"t":"TIGO","name":"Millicom International Cellular SA","yld":3.822,"p":0},{"t":"KSS","name":"Kohl's Corp.","yld":3.82,"p":0},{"t":"MDT","name":"Medtronic Plc","yld":3.81,"p":0},{"t":"PEP","name":"PepsiCo, Inc.","yld":3.808,"p":0},{"t":"USB","name":"U.S. Bancorp","yld":3.78,"p":0},{"t":"ARES","name":"Ares Management Corp.","yld":3.78,"p":0},{"t":"XRX","name":"Xerox Holdings Corp.","yld":3.759,"p":0},{"t":"REG","name":"Regency Centers Corp.","yld":3.757,"p":0},{"t":"SR","name":"Spire Inc.","yld":3.755,"p":0},{"t":"AVB","name":"AvalonBay Communities, Inc.","yld":3.754,"p":0},{"t":"CLDT","name":"Chatham Lodging Trust","yld":3.745,"p":0},{"t":"NWE","name":"NorthWestern Energy Group, Inc.","yld":3.744,"p":0},{"t":"CVX","name":"Chevron Corp.","yld":3.74,"p":1,"i":"Oil & Gas","pe":32.0,"pb":2.0,"fcf":3.96,"de":0.25,"rev":9.3,"ni":-34.7},{"t":"NFBK","name":"Northfield Bancorp, Inc. (New Jersey)","yld":3.736,"p":0},{"t":"ADC","name":"Agree Realty Corp.","yld":3.735,"p":0},{"t":"KFRC","name":"Kforce, Inc.","yld":3.728,"p":0},{"t":"OUT","name":"OUTFRONT Media, Inc.","yld":3.722,"p":0},{"t":"BKH","name":"Black Hills Corp.","yld":3.719,"p":0},{"t":"LW","name":"Lamb Weston Holdings, Inc.","yld":3.718,"p":0},{"t":"CHRD","name":"Chord Energy Corp.","yld":3.712,"p":0},{"t":"HAFC","name":"Hanmi Financial Corp.","yld":3.711,"p":0},{"t":"BHB","name":"Bar Harbor Bankshares","yld":3.71,"p":0},{"t":"BAM","name":"Brookfield Asset Management Ltd.","yld":3.709,"p":0},{"t":"ACN","name":"Accenture Plc","yld":3.696,"p":0},{"t":"GIC","name":"Global Industrial Co.","yld":3.692,"p":0},{"t":"FDBC","name":"Fidelity D&D Bancorp, Inc.","yld":3.688,"p":0},{"t":"COFS","name":"ChoiceOne Financial Services, Inc.","yld":3.685,"p":0},{"t":"CRBG","name":"Corebridge Financial, Inc.","yld":3.683,"p":0},{"t":"IMMR","name":"Immersion Corp.","yld":3.675,"p":0},{"t":"HST","name":"Host Hotels & Resorts, Inc.","yld":3.673,"p":0},{"t":"AKR","name":"Acadia Realty Trust","yld":3.671,"p":0},{"t":"NXST","name":"Nexstar Media Group, Inc.","yld":3.669,"p":0},{"t":"EXC","name":"Exelon Corp.","yld":3.666,"p":0},{"t":"MATW","name":"Matthews International Corp.","yld":3.655,"p":0},{"t":"KMI","name":"Kinder Morgan, Inc.","yld":3.643,"p":0},{"t":"SCVL","name":"Shoe Carnival, Inc.","yld":3.641,"p":0},{"t":"PNW","name":"Pinnacle West Capital Corp.","yld":3.636,"p":0},{"t":"GNK","name":"Genco Shipping & Trading Ltd.","yld":3.622,"p":0},{"t":"NUS","name":"Nu Skin Enterprises, Inc.","yld":3.62,"p":0},{"t":"SWBI","name":"Smith & Wesson Brands, Inc.","yld":3.611,"p":0},{"t":"FRME","name":"First Merchants Corp. (Indiana)","yld":3.608,"p":0},{"t":"WTRG","name":"Essential Utilities, Inc.","yld":3.602,"p":0},{"t":"UTL","name":"UNITIL Corp.","yld":3.596,"p":0},{"t":"WY","name":"Weyerhaeuser Co.","yld":3.587,"p":0},{"t":"TNL","name":"Travel + Leisure Co.","yld":3.584,"p":0},{"t":"UE","name":"Urban Edge Properties","yld":3.583,"p":0},{"t":"FISI","name":"Financial Institutions, Inc.","yld":3.582,"p":0},{"t":"OGE","name":"OGE Energy Corp.","yld":3.579,"p":0},{"t":"CNS","name":"Cohen & Steers, Inc. (New York)","yld":3.576,"p":0},{"t":"BOH","name":"Bank of Hawaii Corp.","yld":3.569,"p":0},{"t":"HFWA","name":"Heritage Financial Corp. (Washington)","yld":3.564,"p":0},{"t":"ALTG","name":"Alta Equipment Group, Inc.","yld":3.546,"p":0},{"t":"IPAR","name":"Interparfums, Inc.","yld":3.546,"p":0},{"t":"HBNC","name":"Horizon Bancorp, Inc. (Indiana)","yld":3.53,"p":0},{"t":"UBSI","name":"United Bankshares, Inc. (West Virginia)","yld":3.523,"p":0},{"t":"MUR","name":"Murphy Oil Corp.","yld":3.522,"p":0},{"t":"BBT","name":"Beacon Financial Corp.","yld":3.519,"p":0},{"t":"WLY","name":"John Wiley & Sons, Inc.","yld":3.514,"p":0},{"t":"FULT","name":"Fulton Financial Corp.","yld":3.507,"p":0},{"t":"SHO","name":"Sunstone Hotel Investors, Inc.","yld":3.505,"p":0},{"t":"CAC","name":"Camden National Corp. (Maine)","yld":3.498,"p":0},{"t":"RM","name":"Regional Management Corp.","yld":3.491,"p":0},{"t":"DRH","name":"DiamondRock Hospitality Co.","yld":3.491,"p":0},{"t":"BHRB","name":"Burke Herbert Financial Services Corp.","yld":3.489,"p":0},{"t":"NTB","name":"The Bank of N.T. Butterfield & Son Ltd.","yld":3.484,"p":0},{"t":"AHRT","name":"AH Realty Trust, Inc.","yld":3.48,"p":0},{"t":"MZTI","name":"The Marzetti Co.","yld":3.473,"p":0},{"t":"NCMI","name":"National CineMedia, Inc.","yld":3.448,"p":0},{"t":"PB","name":"Prosperity Bancshares, Inc.","yld":3.448,"p":0},{"t":"AGM","name":"Federal Agricultural Mortgage Corp.","yld":3.447,"p":0},{"t":"BCML","name":"BayCom Corp.","yld":3.446,"p":0},{"t":"CTRE","name":"CareTrust REIT, Inc.","yld":3.44,"p":0},{"t":"UTZ","name":"UTZ Brands, Inc.","yld":3.44,"p":0},{"t":"DOX","name":"Amdocs Ltd.","yld":3.436,"p":0},{"t":"WABC","name":"Westamerica Bancorporation","yld":3.432,"p":0},{"t":"BF.B","name":"Brown-Forman Corp.","yld":3.41,"p":0},{"t":"LKFN","name":"Lakeland Financial Corp. (Indiana)","yld":3.397,"p":0},{"t":"DUK","name":"Duke Energy Corp.","yld":3.395,"p":1,"i":"Electric Utilities","pe":19.1,"pb":1.82,"de":1.67,"rev":11.3,"ni":11.4},{"t":"VNOM","name":"Viper Energy, Inc.","yld":3.389,"p":0},{"t":"FG","name":"F&G Annuities & Life, Inc.","yld":3.389,"p":0},{"t":"WSBF","name":"Waterstone Financial, Inc.","yld":3.381,"p":0},{"t":"FDP","name":"Fresh Del Monte Produce, Inc.","yld":3.378,"p":0},{"t":"XHR","name":"Xenia Hotels & Resorts, Inc.","yld":3.374,"p":0},{"t":"SUI","name":"Sun Communities, Inc.","yld":3.371,"p":0},{"t":"ASB","name":"Associated Banc-Corp","yld":3.368,"p":0},{"t":"NJR","name":"New Jersey Resources Corp.","yld":3.359,"p":0},{"t":"LXFR","name":"Luxfer Holdings Plc","yld":3.353,"p":0},{"t":"ULH","name":"Universal Logistics Holdings, Inc.","yld":3.344,"p":0},{"t":"TRN","name":"Trinity Industries, Inc.","yld":3.343,"p":0},{"t":"FMAO","name":"Farmers & Merchants Bancorp, Inc. (Ohio)","yld":3.341,"p":0},{"t":"NECB","name":"Northeast Community Bancorp, Inc.","yld":3.336,"p":0},{"t":"GEF","name":"Greif, Inc.","yld":3.333,"p":0},{"t":"CBL","name":"CBL & Associates Properties, Inc.","yld":3.328,"p":0},{"t":"SM","name":"SM Energy Co.","yld":3.326,"p":0},{"t":"ABBV","name":"AbbVie, Inc.","yld":3.324,"p":0},{"t":"VLY","name":"Valley National Bancorp","yld":3.316,"p":0},{"t":"PFBC","name":"Preferred Bank (California)","yld":3.314,"p":0},{"t":"AGNT","name":"eXp World Holdings, Inc.","yld":3.311,"p":0},{"t":"SKT","name":"Tanger, Inc.","yld":3.305,"p":0},{"t":"PEG","name":"Public Service Enterprise Group, Inc.","yld":3.296,"p":0},{"t":"AU","name":"Anglogold Ashanti Plc","yld":3.291,"p":0},{"t":"FFBC","name":"First Financial Bancorp (Ohio)","yld":3.288,"p":0},{"t":"MCBS","name":"MetroCity Bankshares, Inc.","yld":3.275,"p":0},{"t":"EVRG","name":"Evergy, Inc.","yld":3.266,"p":0},{"t":"ADT","name":"ADT, Inc.","yld":3.24,"p":0},{"t":"ED","name":"Consolidated Edison, Inc.","yld":3.236,"p":0},{"t":"NBTB","name":"NBT Bancorp, Inc.","yld":3.235,"p":0},{"t":"SMP","name":"Standard Motor Products, Inc.","yld":3.231,"p":0},{"t":"CPF","name":"Central Pacific Financial Corp.","yld":3.23,"p":0},{"t":"FITB","name":"Fifth Third Bancorp","yld":3.227,"p":0},{"t":"MSM","name":"MSC Industrial Direct Co., Inc.","yld":3.224,"p":0},{"t":"AEO","name":"American Eagle Outfitters, Inc.","yld":3.222,"p":0},{"t":"ELS","name":"Equity LifeStyle Properties, Inc.","yld":3.221,"p":0},{"t":"WEC","name":"WEC Energy Group, Inc.","yld":3.219,"p":0},{"t":"PECO","name":"Phillips Edison & Co., Inc.","yld":3.214,"p":0},{"t":"THFF","name":"First Financial Corp. (Indiana)","yld":3.21,"p":0},{"t":"QSR","name":"Restaurant Brands International, Inc.","yld":3.209,"p":0},{"t":"MDLZ","name":"Mondelez International, Inc.","yld":3.208,"p":0},{"t":"IBCP","name":"Independent Bank Corp. (Michigan)","yld":3.207,"p":0},{"t":"KDP","name":"Keurig Dr Pepper, Inc.","yld":3.204,"p":0},{"t":"FAF","name":"First American Financial Corp.","yld":3.199,"p":0},{"t":"CBRL","name":"Cracker Barrel Old Country Store, Inc.","yld":3.188,"p":0},{"t":"AROW","name":"Arrow Financial Corp.","yld":3.188,"p":0},{"t":"HMN","name":"Horace Mann Educators Corp.","yld":3.184,"p":0},{"t":"STBA","name":"S&T Bancorp, Inc.","yld":3.18,"p":0},{"t":"SO","name":"The Southern Co.","yld":3.179,"p":0},{"t":"PNC","name":"The PNC Financial Services Group, Inc.","yld":3.169,"p":0},{"t":"DTE","name":"DTE Energy Co.","yld":3.166,"p":0},{"t":"OGS","name":"ONE Gas, Inc.","yld":3.166,"p":0},{"t":"CTBI","name":"Community Trust Bancorp, Inc. (Kentucky)","yld":3.164,"p":0},{"t":"PM","name":"Philip Morris International, Inc.","yld":3.163,"p":0},{"t":"CZFS","name":"Citizens Financial Services, Inc.","yld":3.158,"p":0},{"t":"ORRF","name":"Orrstown Financial Services, Inc.","yld":3.152,"p":0},{"t":"MAC","name":"Macerich Co.","yld":3.142,"p":0},{"t":"INDB","name":"Independent Bank Corp. (Massachusetts)","yld":3.142,"p":0},{"t":"DEI","name":"Douglas Emmett, Inc.","yld":3.133,"p":0},{"t":"TOWN","name":"TowneBank","yld":3.124,"p":0},{"t":"PFG","name":"Principal Financial Group, Inc.","yld":3.124,"p":0},{"t":"HOMB","name":"Home Bancshares, Inc. (Arkansas)","yld":3.124,"p":0},{"t":"TRNO","name":"Terreno Realty Corp.","yld":3.12,"p":0},{"t":"FBP","name":"First BanCorp (Puerto Rico)","yld":3.118,"p":0},{"t":"TMP","name":"Tompkins Financial Corp.","yld":3.116,"p":0},{"t":"HBT","name":"HBT Financial, Inc.","yld":3.11,"p":0},{"t":"SD","name":"SandRidge Energy, Inc.","yld":3.104,"p":0},{"t":"ALRS","name":"Alerus Financial Corp.","yld":3.104,"p":0},{"t":"PAG","name":"Penske Automotive Group, Inc.","yld":3.094,"p":0},{"t":"STRA","name":"Strategic Education, Inc.","yld":3.092,"p":0},{"t":"TRST","name":"TrustCo Bank Corp. NY","yld":3.092,"p":0},{"t":"EIG","name":"Employers Holdings, Inc.","yld":3.091,"p":0},{"t":"BANR","name":"Banner Corp.","yld":3.087,"p":0},{"t":"GAP","name":"Gap, Inc.","yld":3.082,"p":0},{"t":"JHG","name":"Janus Henderson Group Plc","yld":3.077,"p":0},{"t":"KELYA","name":"Kelly Services, Inc.","yld":3.077,"p":0},{"t":"IVT","name":"InvenTrust Properties Corp.","yld":3.076,"p":0},{"t":"TSCO","name":"Tractor Supply Co.","yld":3.074,"p":0},{"t":"INGR","name":"Ingredion, Inc.","yld":3.07,"p":0},{"t":"ASH","name":"Ashland, Inc.","yld":3.07,"p":0},{"t":"KTB","name":"Kontoor Brands, Inc.","yld":3.064,"p":0},{"t":"DRI","name":"Darden Restaurants, Inc.","yld":3.064,"p":0},{"t":"ADP","name":"Automatic Data Processing, Inc.","yld":3.061,"p":0},{"t":"CRI","name":"Carter's, Inc.","yld":3.055,"p":0},{"t":"JEF","name":"Jefferies Financial Group, Inc.","yld":3.052,"p":0},{"t":"EPC","name":"Edgewell Personal Care Co.","yld":3.05,"p":0},{"t":"STC","name":"Stewart Information Services Corp.","yld":3.047,"p":0},{"t":"USPH","name":"U.S. Physical Therapy, Inc.","yld":3.046,"p":0},{"t":"WAFD","name":"WaFd, Inc.","yld":3.045,"p":0},{"t":"DBI","name":"Designer Brands, Inc.","yld":3.044,"p":0},{"t":"PPL","name":"PPL Corp.","yld":3.042,"p":0},{"t":"CMS","name":"CMS Energy Corp.","yld":3.04,"p":0},{"t":"AVNT","name":"Avient Corp.","yld":3.029,"p":0},{"t":"PR","name":"Permian Resources Corp.","yld":3.027,"p":0},{"t":"EOG","name":"EOG Resources, Inc.","yld":3.027,"p":0},{"t":"YORW","name":"The York Water Co.","yld":3.026,"p":0},{"t":"UCB","name":"United Community Banks, Inc.","yld":3.025,"p":0},{"t":"ORI","name":"Old Republic International Corp.","yld":3.021,"p":0},{"t":"IBM","name":"International Business Machines Corp.","yld":3.01,"p":0},{"t":"JXN","name":"Jackson Financial, Inc.","yld":3.01,"p":0},{"t":"SCL","name":"Stepan Co.","yld":3.005,"p":0},{"t":"IVZ","name":"Invesco Ltd.","yld":3.001,"p":0},{"t":"HTO","name":"H2O America","yld":2.997,"p":0},{"t":"TSN","name":"Tyson Foods, Inc.","yld":2.996,"p":0},{"t":"CBU","name":"Community Financial System, Inc.","yld":2.994,"p":0},{"t":"NRC","name":"NRC Health","yld":2.993,"p":0},{"t":"KFY","name":"Korn Ferry","yld":2.989,"p":0},{"t":"BAH","name":"Booz Allen Hamilton Holding Corp.","yld":2.989,"p":0},{"t":"MRK","name":"Merck & Co., Inc.","yld":2.984,"p":1,"i":"Pharmaceuticals","pe":31.6,"pb":6.05,"fcf":5.04,"de":1.07,"rev":3.7,"ni":-183.4},{"t":"SYY","name":"Sysco Corp.","yld":2.976,"p":0},{"t":"FCF","name":"First Commonwealth Financial Corp. (Pennsylvania)","yld":2.973,"p":0},{"t":"PG","name":"Procter & Gamble Co.","yld":2.971,"p":1,"i":"Household Products","pe":20.8,"pb":6.18,"fcf":4.34,"de":0.68,"rev":7.4,"ni":4.2},{"t":"MBWM","name":"Mercantile Bank Corp.","yld":2.969,"p":0},{"t":"EGP","name":"EastGroup Properties, Inc.","yld":2.966,"p":0},{"t":"HD","name":"The Home Depot, Inc.","yld":2.964,"p":0},{"t":"CWT","name":"California Water Service Group","yld":2.962,"p":0},{"t":"ABT","name":"Abbott Laboratories","yld":2.955,"p":0},{"t":"CFR","name":"Cullen/Frost Bankers, Inc.","yld":2.949,"p":0},{"t":"CVGW","name":"Calavo Growers, Inc.","yld":2.946,"p":0},{"t":"JOUT","name":"Johnson Outdoors, Inc.","yld":2.945,"p":0},{"t":"WKC","name":"World Kinect Corp.","yld":2.943,"p":0},{"t":"FR","name":"First Industrial Realty Trust, Inc.","yld":2.942,"p":0},{"t":"HAS","name":"Hasbro, Inc.","yld":2.942,"p":1,"i":"Leisure Products","pb":24.9,"fcf":5.15,"de":6.32,"rev":30.8,"ni":866.4},{"t":"HSY","name":"The Hershey Co.","yld":2.939,"p":0},{"t":"NBHC","name":"National Bank Holdings Corp.","yld":2.932,"p":0},{"t":"AMGN","name":"Amgen, Inc.","yld":2.931,"p":0},{"t":"FCBC","name":"First Community Bancshares, Inc. (Virginia)","yld":2.928,"p":0},{"t":"ZION","name":"Zions Bancorporation NA","yld":2.928,"p":0},{"t":"MET","name":"MetLife, Inc.","yld":2.911,"p":0},{"t":"APOG","name":"Apogee Enterprises, Inc.","yld":2.899,"p":0},{"t":"WSO","name":"Watsco, Inc.","yld":2.896,"p":0},{"t":"CFG","name":"Citizens Financial Group, Inc. (Rhode Island)","yld":2.896,"p":0},{"t":"AEP","name":"American Electric Power Co., Inc.","yld":2.892,"p":0},{"t":"WSR","name":"Whitestone REIT","yld":2.885,"p":0},{"t":"CVS","name":"CVS Health Corp.","yld":2.884,"p":0},{"t":"LNT","name":"Alliant Energy Corp.","yld":2.877,"p":0},{"t":"STZ","name":"Constellation Brands, Inc.","yld":2.872,"p":0},{"t":"PTEN","name":"Patterson-UTI Energy, Inc.","yld":2.867,"p":0},{"t":"RYZ","name":"Ryerson Holding Corp.","yld":2.858,"p":0},{"t":"XEL","name":"Xcel Energy, Inc.","yld":2.857,"p":0},{"t":"COP","name":"ConocoPhillips","yld":2.856,"p":0},{"t":"FSBW","name":"FS Bancorp, Inc.","yld":2.853,"p":0},{"t":"HOG","name":"Harley-Davidson, Inc.","yld":2.85,"p":0},{"t":"PLD","name":"Prologis, Inc.","yld":2.846,"p":0},{"t":"ASIX","name":"Advansix, Inc.","yld":2.841,"p":0},{"t":"VTRS","name":"Viatris, Inc.","yld":2.837,"p":0},{"t":"CIVB","name":"Civista Bancshares, Inc.","yld":2.832,"p":0},{"t":"FRST","name":"Primis Financial Corp.","yld":2.831,"p":0},{"t":"CG","name":"The Carlyle Group Inc.","yld":2.831,"p":0},{"t":"SB","name":"Safe Bulkers, Inc.","yld":2.829,"p":0},{"t":"TSBK","name":"Timberland Bancorp, Inc. (Washington)","yld":2.82,"p":0},{"t":"ABM","name":"ABM Industries, Inc.","yld":2.818,"p":0},{"t":"OLN","name":"Olin Corp.","yld":2.815,"p":0},{"t":"MTB","name":"M&T Bank Corp.","yld":2.813,"p":1,"i":"Banks","pe":11.7,"pb":1.19,"fcf":7.51,"de":0.68,"rev":1.5,"ni":13.7},{"t":"TCBK","name":"TriCo Bancshares","yld":2.811,"p":0},{"t":"ALLY","name":"Ally Financial, Inc.","yld":2.808,"p":0},{"t":"CHCO","name":"City Holding Co.","yld":2.806,"p":0},{"t":"TXNM","name":"TXNM Energy, Inc.","yld":2.802,"p":0},{"t":"OFG","name":"OFG Bancorp","yld":2.796,"p":0},{"t":"GBCI","name":"Glacier Bancorp, Inc.","yld":2.795,"p":0},{"t":"GABC","name":"German American Bancorp, Inc.","yld":2.794,"p":0},{"t":"SRE","name":"Sempra","yld":2.793,"p":0},{"t":"BKE","name":"The Buckle, Inc.","yld":2.79,"p":0},{"t":"SWX","name":"Southwest Gas Holdings, Inc.","yld":2.782,"p":0},{"t":"PSX","name":"Phillips 66","yld":2.777,"p":0},{"t":"MTH","name":"Meritage Homes Corp.","yld":2.775,"p":0},{"t":"THO","name":"Thor Industries, Inc.","yld":2.759,"p":0},{"t":"ACNB","name":"ACNB Corp.","yld":2.754,"p":0},{"t":"DINO","name":"HF Sinclair Corp.","yld":2.747,"p":0},{"t":"FNB","name":"F.N.B. Corp. (Pennsylvania)","yld":2.735,"p":0},{"t":"HWC","name":"Hancock Whitney Corp.","yld":2.731,"p":0},{"t":"WMB","name":"The Williams Cos., Inc.","yld":2.73,"p":0},{"t":"DCOM","name":"Dime Community Bancshares, Inc.","yld":2.727,"p":0},{"t":"APA","name":"APA Corp.","yld":2.725,"p":0},{"t":"RBB","name":"RBB Bancorp","yld":2.72,"p":0},{"t":"BKU","name":"BankUnited, Inc.","yld":2.717,"p":0},{"t":"BSRR","name":"Sierra Bancorp","yld":2.717,"p":0},{"t":"RDN","name":"Radian Group Inc.","yld":2.716,"p":0},{"t":"POOL","name":"Pool Corp.","yld":2.706,"p":0},{"t":"MSEX","name":"Middlesex Water Co.","yld":2.701,"p":0},{"t":"XOM","name":"Exxon Mobil Corp.","yld":2.699,"p":0},{"t":"CASS","name":"Cass Information Systems, Inc.","yld":2.698,"p":0},{"t":"NFG","name":"National Fuel Gas Co.","yld":2.694,"p":0},{"t":"NRIM","name":"Northrim BanCorp, Inc.","yld":2.687,"p":0},{"t":"ZTS","name":"Zoetis, Inc.","yld":2.687,"p":0},{"t":"FBIN","name":"Fortune Brands Innovations, Inc.","yld":2.673,"p":0},{"t":"MPB","name":"Mid Penn Bancorp, Inc.","yld":2.671,"p":0},{"t":"CMRE","name":"Costamare, Inc.","yld":2.664,"p":0},{"t":"TNET","name":"TriNet Group, Inc.","yld":2.662,"p":0},{"t":"CRC","name":"California Resources Corp.","yld":2.656,"p":0},{"t":"FIHL","name":"Fidelis Insurance Holdings Ltd.","yld":2.656,"p":0},{"t":"NOV","name":"NOV, Inc.","yld":2.656,"p":0},{"t":"EBC","name":"Eastern Bankshares, Inc.","yld":2.646,"p":0},{"t":"MCD","name":"McDonald's Corp.","yld":2.644,"p":0},{"t":"LMT","name":"Lockheed Martin Corp.","yld":2.635,"p":0},{"t":"EQH","name":"Equitable Holdings, Inc.","yld":2.635,"p":0},{"t":"MVBF","name":"MVB Financial Corp.","yld":2.634,"p":0},{"t":"PPG","name":"PPG Industries, Inc.","yld":2.631,"p":0},{"t":"AWK","name":"American Water Works Co., Inc.","yld":2.627,"p":0},{"t":"BUR","name":"Burford Capital Ltd.","yld":2.626,"p":0},{"t":"KO","name":"The Coca-Cola Co.","yld":2.619,"p":1,"i":"Beverages","pe":24.5,"pb":9.97,"fcf":3.74,"de":1.3,"rev":12.8,"ni":18.9},{"t":"AEE","name":"Ameren Corp.","yld":2.618,"p":0},{"t":"LZB","name":"La-Z-Boy, Inc.","yld":2.607,"p":0},{"t":"AFG","name":"American Financial Group, Inc.","yld":2.607,"p":0},{"t":"PANL","name":"Pangaea Logistics Solutions Ltd.","yld":2.601,"p":0},{"t":"FPI","name":"Farmland Partners, Inc.","yld":2.591,"p":0},{"t":"GBX","name":"Greenbrier Cos., Inc.","yld":2.591,"p":0},{"t":"HP","name":"Helmerich & Payne, Inc.","yld":2.589,"p":0},{"t":"PBF","name":"PBF Energy, Inc.","yld":2.587,"p":0},{"t":"FHN","name":"First Horizon Corp. (Tennessee)","yld":2.579,"p":0},{"t":"PLOW","name":"Douglas Dynamics, Inc.","yld":2.578,"p":0},{"t":"MGPI","name":"MGP Ingredients, Inc.","yld":2.576,"p":0},{"t":"FIP","name":"FTAI Infrastructure, Inc.","yld":2.57,"p":0},{"t":"ADM","name":"Archer-Daniels-Midland Co.","yld":2.568,"p":0},{"t":"AWR","name":"American States Water Co.","yld":2.563,"p":0},{"t":"CTSH","name":"Cognizant Technology Solutions Corp.","yld":2.558,"p":0},{"t":"SSB","name":"SouthState Bank Corp.","yld":2.556,"p":0},{"t":"MTDR","name":"Matador Resources Co.","yld":2.552,"p":0},{"t":"BR","name":"Broadridge Financial Solutions, Inc.","yld":2.552,"p":0},{"t":"MGEE","name":"MGE Energy, Inc.","yld":2.54,"p":0},{"t":"IRM","name":"Iron Mountain, Inc.","yld":2.538,"p":0},{"t":"PRK","name":"Park National Corp.","yld":2.532,"p":0},{"t":"ITW","name":"Illinois Tool Works Inc.","yld":2.511,"p":0},{"t":"SVC","name":"Service Properties Trust","yld":2.5,"p":0},{"t":"KGS","name":"Kodiak Gas Services, Inc.","yld":2.489,"p":0},{"t":"DLR","name":"Digital Realty Trust, Inc.","yld":2.487,"p":0},{"t":"SHBI","name":"Shore Bancshares, Inc.","yld":2.473,"p":0},{"t":"SNA","name":"Snap-On, Inc.","yld":2.473,"p":0},{"t":"OC","name":"Owens Corning","yld":2.47,"p":0},{"t":"WWW","name":"Wolverine World Wide, Inc.","yld":2.469,"p":0},{"t":"NI","name":"NiSource, Inc.","yld":2.466,"p":0},{"t":"CATY","name":"Cathay General Bancorp","yld":2.454,"p":0},{"t":"BDX","name":"Becton, Dickinson & Co.","yld":2.452,"p":0},{"t":"GSBC","name":"Great Southern Bancorp, Inc. (Missouri)","yld":2.45,"p":0},{"t":"NEE","name":"NextEra Energy, Inc.","yld":2.449,"p":0},{"t":"CDW","name":"CDW Corp.","yld":2.448,"p":0},{"t":"WFC","name":"Wells Fargo & Co.","yld":2.446,"p":0},{"t":"HLNE","name":"Hamilton Lane, Inc.","yld":2.439,"p":0},{"t":"OTTR","name":"Otter Tail Corp.","yld":2.438,"p":0},{"t":"SBCF","name":"Seacoast Banking Corp. of Florida","yld":2.436,"p":0},{"t":"AOS","name":"A. O. Smith Corp.","yld":2.426,"p":0},{"t":"RBCAA","name":"Republic Bancorp, Inc. (Kentucky)","yld":2.426,"p":0},{"t":"CNOB","name":"ConnectOne Bancorp, Inc.","yld":2.422,"p":0},{"t":"FFIN","name":"First Financial Bankshares, Inc.","yld":2.414,"p":0},{"t":"MDU","name":"MDU Resources Group, Inc.","yld":2.412,"p":0},{"t":"CL","name":"Colgate-Palmolive Co.","yld":2.41,"p":0},{"t":"IDA","name":"IDACORP, Inc.","yld":2.407,"p":0},{"t":"CBAN","name":"Colony Bankcorp, Inc.","yld":2.405,"p":0},{"t":"BBW","name":"Build-A-Bear Workshop, Inc.","yld":2.4,"p":0},{"t":"DLB","name":"Dolby Laboratories, Inc.","yld":2.396,"p":0},{"t":"SLM","name":"SLM Corp.","yld":2.39,"p":0},{"t":"GILD","name":"Gilead Sciences, Inc.","yld":2.389,"p":0},{"t":"VNO","name":"Vornado Realty Trust","yld":2.384,"p":0},{"t":"EXE","name":"Expand Energy Corp.","yld":2.378,"p":0},{"t":"SPB","name":"Spectrum Brands Holdings, Inc.","yld":2.377,"p":0},{"t":"CCNE","name":"CNB Financial Corp. (Pennsylvania)","yld":2.375,"p":0},{"t":"AIG","name":"American International Group, Inc.","yld":2.367,"p":0},{"t":"MYE","name":"Myers Industries, Inc.","yld":2.363,"p":0},{"t":"APD","name":"Air Products & Chemicals, Inc.","yld":2.358,"p":0},{"t":"JNJ","name":"Johnson & Johnson","yld":2.348,"p":1,"i":"Pharmaceuticals","pe":25.5,"pb":6.54,"fcf":3.32,"de":0.68,"rev":9.9,"ni":-52.4},{"t":"ONB","name":"Old National Bancorp","yld":2.339,"p":0},{"t":"SBUX","name":"Starbucks Corp.","yld":2.327,"p":0},{"t":"UVSP","name":"Univest Financial Corp.","yld":2.326,"p":0},{"t":"CURB","name":"Curbline Properties Corp.","yld":2.323,"p":0},{"t":"CAL","name":"Caleres, Inc.","yld":2.322,"p":0},{"t":"AVY","name":"Avery Dennison Corp.","yld":2.321,"p":0},{"t":"FMBH","name":"First Mid Bancshares, Inc.","yld":2.312,"p":0},{"t":"CMCL","name":"Caledonia Mining Corp. Plc","yld":2.306,"p":0},{"t":"LMNR","name":"Limoneira Co.","yld":2.304,"p":0},{"t":"DPZ","name":"Domino's Pizza, Inc.","yld":2.302,"p":0},{"t":"MEI","name":"Methode Electronics, Inc.","yld":2.301,"p":0},{"t":"UNH","name":"UnitedHealth Group, Inc.","yld":2.299,"p":0},{"t":"MTG","name":"MGIC Investment Corp.","yld":2.299,"p":0},{"t":"DTM","name":"DT Midstream, Inc.","yld":2.299,"p":0},{"t":"EWBC","name":"East West Bancorp, Inc.","yld":2.297,"p":0},{"t":"LEN","name":"Lennar Corp.","yld":2.296,"p":0},{"t":"VOYA","name":"Voya Financial, Inc.","yld":2.296,"p":0},{"t":"VCTR","name":"Victory Capital Holdings, Inc.","yld":2.284,"p":0},{"t":"EG","name":"Everest Group Ltd.","yld":2.281,"p":0},{"t":"RES","name":"RPC, Inc.","yld":2.279,"p":0},{"t":"CNH","name":"CNH Industrial NV","yld":2.279,"p":0},{"t":"CNMD","name":"CONMED Corp.","yld":2.271,"p":0},{"t":"OTIS","name":"Otis Worldwide Corp.","yld":2.27,"p":0},{"t":"FBIZ","name":"First Business Financial Services, Inc.","yld":2.27,"p":0},{"t":"RNST","name":"Renasant Corp.","yld":2.263,"p":0},{"t":"AROC","name":"Archrock, Inc.","yld":2.261,"p":0},{"t":"UNM","name":"Unum Group","yld":2.257,"p":0},{"t":"PKG","name":"Packaging Corporation of America","yld":2.257,"p":0},{"t":"DG","name":"Dollar General Corp.","yld":2.256,"p":0},{"t":"EVC","name":"Entravision Communications Corp.","yld":2.255,"p":0},{"t":"LEA","name":"Lear Corp.","yld":2.242,"p":0},{"t":"DOLE","name":"Dole Plc","yld":2.235,"p":0},{"t":"VTR","name":"Ventas, Inc.","yld":2.235,"p":0},{"t":"GEN","name":"Gen Digital, Inc.","yld":2.232,"p":0},{"t":"CCBG","name":"Capital City Bank Group, Inc.","yld":2.232,"p":0},{"t":"ETR","name":"Entergy Corp.","yld":2.231,"p":0},{"t":"ESRT","name":"Empire State Realty Trust, Inc.","yld":2.23,"p":0},{"t":"G","name":"Genpact Ltd.","yld":2.228,"p":0},{"t":"BANC","name":"Banc of California, Inc.","yld":2.228,"p":0},{"t":"MRSH","name":"Marsh & McLennan Cos., Inc.","yld":2.228,"p":0},{"t":"BG","name":"Bunge Global SA","yld":2.22,"p":0},{"t":"DKS","name":"Dick's Sporting Goods, Inc.","yld":2.219,"p":0},{"t":"WBS","name":"Webster Financial Corp.","yld":2.218,"p":0},{"t":"SRCE","name":"1st Source Corp.","yld":2.216,"p":0},{"t":"TRMK","name":"Trustmark Corp.","yld":2.2,"p":0},{"t":"FSBC","name":"Five Star Bancorp","yld":2.193,"p":0},{"t":"STT","name":"State Street Corp.","yld":2.184,"p":0},{"t":"CPK","name":"Chesapeake Utilities Corp.","yld":2.182,"p":0},{"t":"MGY","name":"Magnolia Oil & Gas Corp.","yld":2.18,"p":0},{"t":"DK","name":"Delek US Holdings, Inc.","yld":2.179,"p":0},{"t":"BAC","name":"Bank of America Corp.","yld":2.176,"p":0},{"t":"BC","name":"Brunswick Corp.","yld":2.175,"p":0},{"t":"CINF","name":"Cincinnati Financial Corp.","yld":2.174,"p":1,"i":"Insurance","pe":9.25,"pb":1.59,"fcf":13.5,"de":0.06,"rev":11.6,"ni":404.4},{"t":"WLK","name":"Westlake Corp.","yld":2.168,"p":0},{"t":"SHOO","name":"Steven Madden Ltd.","yld":2.16,"p":0},{"t":"KMT","name":"Kennametal, Inc.","yld":2.158,"p":0},{"t":"CCS","name":"Century Communities, Inc.","yld":2.154,"p":0},{"t":"MTCH","name":"Match Group, Inc.","yld":2.153,"p":0},{"t":"TROX","name":"Tronox Holdings Plc","yld":2.144,"p":0},{"t":"RPM","name":"RPM International, Inc.","yld":2.14,"p":0},{"t":"BFST","name":"Business First Bancshares, Inc.","yld":2.131,"p":0},{"t":"EFSC","name":"Enterprise Financial Services Corp.","yld":2.13,"p":0},{"t":"CBT","name":"Cabot Corp.","yld":2.129,"p":0},{"t":"FAST","name":"Fastenal Co.","yld":2.125,"p":0},{"t":"LOW","name":"Lowe's Companies, Inc.","yld":2.123,"p":0},{"t":"IOSP","name":"Innospec, Inc.","yld":2.116,"p":0},{"t":"KR","name":"The Kroger Co.","yld":2.114,"p":0},{"t":"LVS","name":"Las Vegas Sands Corp.","yld":2.113,"p":0},{"t":"SBAC","name":"SBA Communications Corp.","yld":2.108,"p":0},{"t":"MKTX","name":"MarketAxess Holdings, Inc.","yld":2.107,"p":0},{"t":"CI","name":"The Cigna Group","yld":2.107,"p":0},{"t":"CBSH","name":"Commerce Bancshares, Inc. (Missouri)","yld":2.106,"p":0},{"t":"CNP","name":"CenterPoint Energy, Inc.","yld":2.106,"p":0},{"t":"SLB","name":"SLB Ltd.","yld":2.094,"p":0},{"t":"GNE","name":"Genie Energy Ltd.","yld":2.093,"p":0},{"t":"MS","name":"Morgan Stanley","yld":2.093,"p":0},{"t":"KBH","name":"KB Home","yld":2.089,"p":0},{"t":"ESNT","name":"Essent Group Ltd.","yld":2.082,"p":0},{"t":"UNP","name":"Union Pacific Corp.","yld":2.081,"p":0},{"t":"WAL","name":"Western Alliance Bancorp.","yld":2.079,"p":0},{"t":"PBI","name":"Pitney Bowes, Inc.","yld":2.076,"p":0},{"t":"LEG","name":"Leggett & Platt, Inc.","yld":2.073,"p":0},{"t":"MMM","name":"3M Co.","yld":2.072,"p":0},{"t":"GNTX","name":"Gentex Corp.","yld":2.069,"p":0},{"t":"FANG","name":"Diamondback Energy, Inc.","yld":2.065,"p":0},{"t":"HON","name":"Honeywell International, Inc.","yld":2.058,"p":0},{"t":"HRI","name":"Herc Holdings, Inc.","yld":2.057,"p":0},{"t":"DVN","name":"Devon Energy Corp.","yld":2.054,"p":0},{"t":"BAX","name":"Baxter International, Inc.","yld":2.054,"p":0},{"t":"ATO","name":"Atmos Energy Corp.","yld":2.054,"p":0},{"t":"SLGN","name":"Silgan Holdings, Inc.","yld":2.046,"p":0},{"t":"HTH","name":"Hilltop Holdings, Inc.","yld":2.039,"p":0},{"t":"OLED","name":"Universal Display Corp.","yld":2.037,"p":0},{"t":"AFL","name":"Aflac, Inc.","yld":2.035,"p":0},{"t":"KBR","name":"KBR, Inc.","yld":2.033,"p":0},{"t":"IFF","name":"International Flavors & Fragrances, Inc.","yld":2.032,"p":0},{"t":"OVV","name":"Ovintiv, Inc.","yld":2.031,"p":0},{"t":"CWBC","name":"Community West Bancshares","yld":2.03,"p":0},{"t":"COLM","name":"Columbia Sportswear Co.","yld":2.026,"p":0},{"t":"WH","name":"Wyndham Hotels & Resorts, Inc.","yld":2.023,"p":0},{"t":"MOS","name":"The Mosaic Co.","yld":2.019,"p":0},{"t":"EXPO","name":"Exponent, Inc.","yld":2.011,"p":0},{"t":"BPOP","name":"Popular, Inc.","yld":2.007,"p":0},{"t":"FDS","name":"FactSet Research Systems, Inc.","yld":2.007,"p":0},{"t":"VFC","name":"VF Corp.","yld":2.007,"p":0},{"t":"FRBA","name":"First Bank (Hamilton, New Jersey)","yld":2.007,"p":0},{"t":"NGVC","name":"Natural Grocers by Vitamin Cottage, Inc.","yld":2.002,"p":0}];
+
+// Enrich: ensure all fields exist
+let allStocks = RAW.map(r=>({
+  t:r.t, name:r.name, yld:r.yld||0,
+  pe:r.pe||null, pb:r.pb||null, peg:null,
+  fcf:r.fcf||null, de:(r.de!==undefined&&r.de!==null)?r.de:null,
+  rev:r.rev||null, ni:r.ni||null,
+  i:r.i||'', p:r.p||0,
+  hasFullData: r.pe!==undefined && r.pe!==null
+}));
+
+const portStocks = allStocks.filter(s=>s.p===1);
+const en={yn:true,yx:true,fcf:true,pe:true,pb:true,peg:false,de:true,rv:true,ni:true};
+
+// SCREEN PAGINATION
+let screenPage=0;
+const PAGE_SIZE=50;
+
+function q(id){return document.getElementById(id)}
+function gc(){return{yn:+q('c-yn').value,yx:+q('c-yx').value,fcf:+q('c-fcf').value,pe:+q('c-pe').value,pb:+q('c-pb').value,peg:+q('c-peg').value,de:+q('c-de').value,rv:+q('c-rv').value,ni:+q('c-ni').value};}
+
+function evalS(s,c){
+  const f=[];
+  if(en.yn&&s.yld<c.yn) f.push('Yield '+s.yld.toFixed(2)+'%<'+c.yn+'%');
+  if(en.yx&&s.yld>c.yx) f.push('Yield '+s.yld.toFixed(2)+'%>'+c.yx+'%');
+  if(en.fcf&&s.fcf!==null&&s.fcf<c.fcf) f.push('FCF '+s.fcf.toFixed(1)+'%<'+c.fcf+'%');
+  if(en.pe&&s.pe!==null&&s.pe>c.pe) f.push('PE '+s.pe.toFixed(0)+'x>'+c.pe+'x');
+  if(en.pb&&s.pb!==null&&s.pb>c.pb) f.push('PB '+s.pb.toFixed(1)+'x>'+c.pb+'x');
+  if(en.de&&s.de!==null&&Math.abs(s.de)>c.de) f.push('DE '+Math.abs(s.de).toFixed(2)+'x>'+c.de+'x');
+  if(en.rv&&s.rev!==null&&s.rev<c.rv) f.push('Rev '+s.rev.toFixed(1)+'%<'+c.rv+'%');
+  if(en.ni&&s.ni!==null&&s.ni<c.ni) f.push('NI '+s.ni.toFixed(0)+'%<'+c.ni+'%');
+  return f;
+}
+
+function score(s){
+  const wy=+q('w-y').value/100,wf=+q('w-f').value/100,wp=+q('w-p').value/100,wr=+q('w-r').value/100,wd=+q('w-d').value/100;
+  const n=(v,lo,hi,inv)=>{if(v===null||v===undefined||isNaN(v))return 0.5;const r=(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo);return inv?1-r:r;};
+  // For yield-only stocks, use a yield-only score
+  if(!s.hasFullData){
+    const yScore=n(s.yld,2,8,false);
+    return Math.round(yScore*100*(wy/(wy||1)));
+  }
+  return Math.round(100*(wy*n(s.yld,0,8,false)+wf*n(s.fcf,0,15,false)+wp*n(s.pe,5,60,true)+wr*n(s.rev,-20,60,false)+wd*n(s.de!==null?Math.abs(s.de):null,0,10,true)));
+}
+
+function mcell(v,fail,sfx,dec){
+  if(v===null||v===undefined)return'<td class="r mna">—</td>';
+  const cls=fail?'mf':'mp';
+  return`<td class="r ${cls}">${(+v).toFixed(dec)+sfx}</td>`;
+}
+
+function renderPort(){
+  const c=gc();const fv=q('pf').value;
+  let pass=0,warn=0,fail=0,ty=0,cy=0;
+  portStocks.forEach(s=>{const f=evalS(s,c);if(f.length===0)pass++;else if(f.length===1)warn++;else fail++;if(s.yld>0){ty+=s.yld;cy++;}});
+  q('s-h').textContent=portStocks.length;q('s-p').textContent=pass;q('s-w').textContent=warn;q('s-f').textContent=fail;
+  q('s-y').textContent=cy>0?(ty/cy).toFixed(2)+'%':'—';
+  let html='';
+  portStocks.forEach(s=>{
+    const f=evalS(s,c);const nf=f.length;
+    if(fv==='fail'&&nf===0)return;if(fv==='pass'&&nf>0)return;
+    const sc=nf===0?'bp':nf===1?'bw':'bf';const sl=nf===0?'✓ Pass':nf===1?'⚠ 1 issue':'✗ '+nf+' issues';
+    const yf=en.yn&&s.yld<c.yn||en.yx&&s.yld>c.yx;
+    const pef=en.pe&&s.pe!==null&&s.pe>c.pe;
+    const pbf=en.pb&&s.pb!==null&&s.pb>c.pb;
+    const fcff=en.fcf&&s.fcf!==null&&s.fcf<c.fcf;
+    const def=en.de&&s.de!==null&&Math.abs(s.de)>c.de;
+    const rvf=en.rv&&s.rev!==null&&s.rev<c.rv;
+    const nif=en.ni&&s.ni!==null&&s.ni<c.ni;
+    const priceCell = s.livePrice
+      ? `<td class="r mp" style="font-weight:700">$${s.livePrice.toFixed(2)}</td>`
+        + (s.liveChgPct !== null
+            ? `<td class="r" style="color:${s.liveChgPct>=0?'var(--green)':'var(--red)'}">${s.liveChgPct>=0?'+':''}${s.liveChgPct.toFixed(2)}%</td>`
+            : '<td class="r mna">—</td>')
+      : '<td class="r mna">—</td><td class="r mna">—</td>';
+    html+=`<tr><td class="tk">${s.t}</td><td class="nm" title="${s.name}">${s.name}</td><td class="ind">${s.i}</td>
+      ${priceCell}
+      ${mcell(s.yld,yf,'%',2)}${mcell(s.pe,pef,'x',1)}${mcell(s.pb,pbf,'x',1)}
+      ${mcell(s.fcf,fcff,'%',2)}${mcell(s.de!==null?Math.abs(s.de):null,def,'x',2)}${mcell(s.rev,rvf,'%',1)}${mcell(s.ni,nif,'%',0)}
+      <td><span class="badge ${sc}">${sl}</span></td>
+      <td style="min-width:160px">${f.length?'<div class="fail-pills">'+f.map(x=>'<span class="fp">'+x+'</span>').join('')+'</div>':''}</td>
+    </tr>`;
+  });
+  q('port-tbody').innerHTML=html||'<tr><td colspan="12" style="text-align:center;padding:20px;color:var(--slatel)">No results for this filter</td></tr>';
+}
+
+function getScreenData(){
+  const c=gc();const fv=q('sf').value,my=+q('sy').value,myx=+q('syx').value||99;
+  const sq=(q('search-q').value||'').toLowerCase();
+  const srt=q('ssort').value;
+  let data=[...allStocks];
+  if(fv==='port') data=data.filter(s=>s.p===1);
+  if(fv==='nonport') data=data.filter(s=>s.p===0);
+  if(my>0) data=data.filter(s=>s.yld>=my);
+  if(myx<99) data=data.filter(s=>s.yld<=myx);
+  if(sq) data=data.filter(s=>s.t.toLowerCase().includes(sq)||s.name.toLowerCase().includes(sq));
+  if(srt==='yld') data.sort((a,b)=>b.yld-a.yld);
+  else if(srt==='yldAsc') data.sort((a,b)=>a.yld-b.yld);
+  else data.sort((a,b)=>a.t.localeCompare(b.t));
+  return data;
+}
+
+function renderScreener(){
+  screenPage=0;renderScreenPage();
+}
+
+function renderScreenPage(){
+  const data=getScreenData();
+  const total=data.length;const start=screenPage*PAGE_SIZE;const end=Math.min(start+PAGE_SIZE,total);
+  const page=data.slice(start,end);
+  q('screener-count').textContent=`Showing ${start+1}–${end} of ${total} securities`;
+  let html='';
+  page.forEach((s,i)=>{
+    const rank=start+i+1;
+    const inp=s.p===1;
+    html+=`<tr>
+      <td style="font-family:monospace;font-size:11px;color:var(--slatel)">${rank}</td>
+      <td class="tk">${s.t}</td>
+      <td class="nm" title="${s.name}">${s.name}</td>
+      <td class="r mp">${s.yld.toFixed(2)}%</td>
+      ${mcell(s.pe,false,'x',1)}${mcell(s.pb,false,'x',1)}${mcell(s.fcf,false,'%',2)}
+      ${mcell(s.de!==null?Math.abs(s.de):null,false,'x',2)}${mcell(s.rev,false,'%',1)}
+      <td><span class="badge ${inp?'bp':'bn'}">${inp?'✓ Held':'—'}</span></td>
+      <td><span class="badge ${s.hasFullData?'bp':'bn'}">${s.hasFullData?'✓ Full':'Yield only'}</span></td>
+    </tr>`;
+  });
+  q('screen-tbody').innerHTML=html;
+  const totalPages=Math.ceil(total/PAGE_SIZE);
+  q('screen-pager').innerHTML=`
+    <button onclick="screenPage--;renderScreenPage()" ${screenPage===0?'disabled':''}>← Prev</button>
+    <span>Page ${screenPage+1} of ${totalPages}</span>
+    <button onclick="screenPage++;renderScreenPage()" ${screenPage>=totalPages-1?'disabled':''}>Next →</button>
+  `;
+}
+
+function buildOpt(){
+  const c=gc();const n=+q('on').value||20,oy=+q('oy').value||0,oyx=+q('oyx').value||99,ode=+q('ode').value||99;
+  let cands=allStocks
+    .filter(s=>s.yld>=oy&&s.yld<=oyx)
+    .filter(s=>s.de===null||Math.abs(s.de)<=ode)
+    .map(s=>({...s,sc:score(s),fl:evalS(s,c)}))
+    .sort((a,b)=>b.sc-a.sc);
+  const sel=cands.slice(0,n);
+  const avg=sel.length>0?Math.round(sel.reduce((a,s)=>a+s.sc,0)/sel.length):0;
+  q('os').textContent=avg;
+  const eqw=(100/sel.length).toFixed(1);
+  const portT=new Set(portStocks.map(s=>s.t));
+  let html='';
+  sel.forEach((s,i)=>{
+    const rc=i<3?'top':i<8?'good':'';const inp=portT.has(s.t);
+    html+=`<tr>
+      <td><span class="rnum ${rc}">${i+1}</span></td>
+      <td class="tk">${s.t}</td>
+      <td class="nm" title="${s.name}">${s.name}</td>
+      <td class="ind">${s.i||'—'}</td>
+      <td class="r mp" style="font-weight:700">${s.sc}</td>
+      <td class="r mp">${s.yld.toFixed(2)}%</td>
+      ${mcell(s.pe,false,'x',1)}${mcell(s.de!==null?Math.abs(s.de):null,false,'x',2)}${mcell(s.rev,false,'%',1)}
+      <td class="r" style="font-weight:600">${eqw}%</td>
+      <td><span class="badge ${inp?'bp':'bn'}">${inp?'✓ Hold':'➕ Add'}</span></td>
+    </tr>`;
+  });
+  q('opt-tbody').innerHTML=html;
+  const selT=new Set(sel.map(s=>s.t));
+  const rem=portStocks.filter(s=>!selT.has(s.t));
+  let rhtml='';
+  if(rem.length===0){rhtml='<p style="color:var(--slatel);font-size:12px">All current holdings qualify with these filters.</p>';}
+  else rem.forEach(s=>{
+    const fl=evalS(s,c);
+    rhtml+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span class="tk">${s.t}</span><span class="ind" style="flex:1">${s.name}</span>
+      <span class="badge bf">Review</span>
+      <div class="fail-pills">${fl.map(f=>'<span class="fp">'+f+'</span>').join('')}</div>
+    </div>`;
+  });
+  q('remove-list').innerHTML=rhtml;
+}
+
+function uc(){
+  [['c-yn','cv-yn','%',2],['c-yx','cv-yx','%',2],['c-fcf','cv-fcf','%',1],['c-pe','cv-pe','x',0],['c-pb','cv-pb','x',1],['c-peg','cv-peg','x',1],['c-de','cv-de','x',2],['c-rv','cv-rv','%',0],['c-ni','cv-ni','%',0]]
+  .forEach(([inp,out,sfx,dec])=>{const v=+q(inp).value;q(out).textContent=v.toFixed(dec)+sfx;});
+  ra();
+}
+function uw(){
+  const ids=['y','f','p','r','d'];let tot=0;
+  ids.forEach(id=>{const v=+q('w-'+id).value;q('wv-'+id).textContent=v+'%';tot+=v;});
+  const el=q('wtot-badge');
+  el.textContent=`${tot}%${tot===100?' ✓':''}`;
+  el.style.color=tot===100?'var(--green)':tot>100?'var(--red)':'var(--amber)';
+  ra();
+}
+function tog(btn,key){btn.classList.toggle('on');en[key]=btn.classList.contains('on');ra();}
+function ra(){renderPort();renderScreenPage();buildOpt();}
+
+function showPage(id,tab){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('act'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('act'));
+  q('pg-'+id).classList.add('act');tab.classList.add('act');
+  if(id==='screener'){renderScreener();}
+  if(id==='optimal'){buildOpt();}
+}
+
+function handleUpload(input){
+  const file=input.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const lines=e.target.result.split('\n').filter(l=>l.trim());
+    if(lines.length<2){alert('File appears empty or invalid');return;}
+    const hdrs=lines[0].split(',').map(h=>h.replace(/"/g,'').trim());
+    const rows=lines.slice(1).map(line=>{
+      const vals=[];let cur='',inQ=false;
+      for(const ch of line){if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}else cur+=ch;}
+      vals.push(cur.trim());
+      const obj={};hdrs.forEach((h,i)=>obj[h]=vals[i]||null);return obj;
+    });
+    const tCol=hdrs.find(h=>/symbol|ticker/i.test(h));
+    const yCol=hdrs.find(h=>/dividend yield/i.test(h));
+    const peCol=hdrs.find(h=>/pe ratio|p\/e/i.test(h));
+    const pbCol=hdrs.find(h=>/price to book/i.test(h));
+    const fcfCol=hdrs.find(h=>/free cash flow yield/i.test(h));
+    const deCol=hdrs.find(h=>/debt.to.equity/i.test(h));
+    const revCol=hdrs.find(h=>/revenue.*growth/i.test(h));
+    const niCol=hdrs.find(h=>/net income.*growth/i.test(h));
+    const indCol=hdrs.find(h=>/industry|sector/i.test(h));
+    if(!tCol){alert('No ticker/symbol column found');return;}
+    rows.forEach(row=>{
+      const tk=(row[tCol]||'').toUpperCase().trim();
+      const idx=allStocks.findIndex(s=>s.t===tk);
+      const pf=(v)=>{if(!v)return null;const n=parseFloat(v);return isNaN(n)?null:n;};
+      const pct=(v)=>{if(!v)return null;const n=parseFloat(v);if(isNaN(n))return null;return Math.abs(n)<1?n*100:n;};
+      const newS={
+        yld:yCol?pct(row[yCol])??0:0, pe:peCol?pf(row[peCol]):null,
+        pb:pbCol?pf(row[pbCol]):null, fcf:fcfCol?pct(row[fcfCol]):null,
+        de:deCol?pf(row[deCol]):null, rev:revCol?pct(row[revCol]):null,
+        ni:niCol?pct(row[niCol]):null, i:indCol?row[indCol]||'':''
+      };
+      if(idx>=0){Object.assign(allStocks[idx],newS,{hasFullData:newS.pe!==null});}
+      else{allStocks.push({t:tk,name:tk,p:0,hasFullData:newS.pe!==null,...newS});}
+    });
+    q('asof-lbl').textContent='Loaded: '+file.name+' ('+new Date().toLocaleDateString()+')';
+    q('universe-count').textContent=allStocks.length+' securities';
+    q('s-u').textContent=allStocks.length;
+    ra();renderScreener();
+    alert('Loaded '+rows.length+' rows from '+file.name+'. Full data now available for '+allStocks.filter(s=>s.hasFullData).length+' securities.');
+  };
+  r.readAsText(file);
+}
+
+// ═══════════════════════════════════════════════════
+// MASSIVE API — Free Basic Plan (EOD Data)
+// Paste your API key on the line below
+// ═══════════════════════════════════════════════════
+const MASSIVE_API_KEY = 'hGWSafNClfkmeDXohPRZPl5ttVfdYRpl';
+
+const PORT_TICKERS=['LLY','PAYX','MSFT','APAM','BLK','CINF','GD','AMT','PG','T','MRK','MTB','NSC','DUK','JNJ','KO','HAS','VZ','MO','CVX','STX','INTC'];
+
+const _q=[];let _r=false;
+function rateLimit(fn){return new Promise((res,rej)=>{_q.push({fn,res,rej});if(!_r)_pq();});}
+function _pq(){if(!_q.length){_r=false;return;}_r=true;const{fn,res,rej}=_q.shift();fn().then(res).catch(rej).finally(()=>setTimeout(_pq,13000));}
+
+async function _fetch(path){
+  const r=await fetch('https://api.polygon.io'+path,{headers:{'Authorization':'Bearer '+MASSIVE_API_KEY}});
+  if(!r.ok)throw new Error('API '+r.status);
+  return r.json();
+}
+
+function showRefreshSpinner(a){const b=document.getElementById('refresh-btn');if(b){b.textContent=a?'⟳ Refreshing…':'⟳ Refresh Prices';b.disabled=a;}}
+function setDataBadge(t,c){const e=document.getElementById('data-badge');if(e){e.textContent=t;e.style.color=c||'';}}
+function updateTimestamp(){const n=new Date();const e=document.getElementById('asof-lbl');if(e)e.textContent='EOD via Massive · '+n.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+
+async function refreshPrices(){
+  showRefreshSpinner(true);
+  setDataBadge('Fetching…','#92400e');
+  try{
+    const tickers=PORT_TICKERS.join(',');
+    const data=await rateLimit(()=>_fetch('/v2/snapshot/locale/us/markets/stocks/tickers?tickers='+tickers+'&apiKey='+MASSIVE_API_KEY));
+    let n=0;
+    if(data&&data.tickers){
+      data.tickers.forEach(item=>{
+        const s=allStocks.find(x=>x.t===item.ticker);
+        if(s){
+          s.livePrice=(item.prevDay&&item.prevDay.c)?item.prevDay.c:null;
+          s.liveChgPct=(item.todaysChangePerc!==undefined)?item.todaysChangePerc:null;
+          s.liveLoaded=true;
+          if(s.livePrice)n++;
+        }
+      });
+    }
+    updateTimestamp();
+    if(n>0){setDataBadge('EOD · '+n+' prices loaded','#2d6a4f');}
+    else{setDataBadge('Connected · no data yet','#92400e');}
+    ra();
+  }catch(err){
+    console.error('Massive API error:',err);
+    setDataBadge('API error — see console','#9b2335');
+  }
+  showRefreshSpinner(false);
+}
+
+setTimeout(refreshPrices, 1000);
+
+// INIT
+uw();uc();renderPort();
+</script>
+</body>
+</html>
