@@ -572,23 +572,38 @@ async function refreshPrices(){
   showRefreshSpinner(true);
   setDataBadge('Fetching…','#92400e');
   let n=0;
+  const failed=[];
+
+  // First pass
   for(const ticker of PORT_TICKERS){
     try{
       const p=await fetchYahooPrice(ticker);
       const s=allStocks.find(x=>x.t===ticker);
-      if(s&&p.close){
-        s.livePrice=p.close;
-        s.liveChgPct=p.chgPct;
-        s.liveLoaded=true;
-        n++;
-      }
+      if(s&&p.close){s.livePrice=p.close;s.liveChgPct=p.chgPct;s.liveLoaded=true;n++;}
+      else failed.push(ticker);
     }catch(e){
-      console.warn('Yahoo price failed for '+ticker+':',e.message);
+      console.warn('Failed (will retry):',ticker,e.message);
+      failed.push(ticker);
     }
-    await new Promise(r=>setTimeout(r,120));
+    await new Promise(r=>setTimeout(r,200));
   }
+
+  // Retry failed tickers once after a pause
+  if(failed.length>0){
+    setDataBadge('Retrying '+failed.length+' tickers…','#92400e');
+    await new Promise(r=>setTimeout(r,1500));
+    for(const ticker of failed){
+      try{
+        const p=await fetchYahooPrice(ticker);
+        const s=allStocks.find(x=>x.t===ticker);
+        if(s&&p.close){s.livePrice=p.close;s.liveChgPct=p.chgPct;s.liveLoaded=true;n++;}
+      }catch(e){console.warn('Retry failed:',ticker,e.message);}
+      await new Promise(r=>setTimeout(r,400));
+    }
+  }
+
   updateTimestamp();
-  setDataBadge(n>0?'EOD · '+n+' prices loaded':'Price fetch failed', n>0?'#2d6a4f':'#9b2335');
+  setDataBadge(n>0?'EOD · '+n+' prices loaded':'Price fetch failed',n>0?'#2d6a4f':'#9b2335');
   showRefreshSpinner(false);
   ra();
 }
