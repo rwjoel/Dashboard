@@ -541,54 +541,54 @@ function handleUpload(input){
 }
 
 // ═══════════════════════════════════════════════════
-// MASSIVE API — Free Basic Plan (EOD Data)
-// Paste your API key on the line below
+// YAHOO FINANCE — Free, no API key required
+// Uses v8/chart endpoint — works from GitHub Pages
 // ═══════════════════════════════════════════════════
-const MASSIVE_API_KEY = 'w3N0HqOusDvSzOmhMpyHTLJeAvH1xNOk';
-
 const PORT_TICKERS=['LLY','PAYX','MSFT','APAM','BLK','CINF','GD','AMT','PG','T','MRK','MTB','NSC','DUK','JNJ','KO','HAS','VZ','MO','CVX','STX','INTC'];
-
-const _q=[];let _r=false;
-function rateLimit(fn){return new Promise((res,rej)=>{_q.push({fn,res,rej});if(!_r)_pq();});}
-function _pq(){if(!_q.length){_r=false;return;}_r=true;const{fn,res,rej}=_q.shift();fn().then(res).catch(rej).finally(()=>setTimeout(_pq,13000));}
-
-async function _fetch(path){
-  const r=await fetch('https://api.massive.com'+path,{headers:{'Authorization':'Bearer '+MASSIVE_API_KEY}});
-  if(!r.ok)throw new Error('API '+r.status);
-  return r.json();
-}
 
 function showRefreshSpinner(a){const b=document.getElementById('refresh-btn');if(b){b.textContent=a?'⟳ Refreshing…':'⟳ Refresh Prices';b.disabled=a;}}
 function setDataBadge(t,c){const e=document.getElementById('data-badge');if(e){e.textContent=t;e.style.color=c||'';}}
-function updateTimestamp(){const n=new Date();const e=document.getElementById('asof-lbl');if(e)e.textContent='EOD via Massive · '+n.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function updateTimestamp(){const n=new Date();const e=document.getElementById('asof-lbl');if(e)e.textContent='Yahoo Finance · '+n.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+
+async function fetchYahooPrice(ticker){
+  const url='https://query1.finance.yahoo.com/v8/finance/chart/'+ticker+'?interval=1d&range=2d';
+  const r=await fetch(url,{headers:{'User-Agent':'Mozilla/5.0'}});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const d=await r.json();
+  const meta=d?.chart?.result?.[0]?.meta;
+  if(!meta) throw new Error('No data');
+  return{
+    close: meta.regularMarketPrice||null,
+    prevClose: meta.chartPreviousClose||null,
+    chgPct: meta.regularMarketPrice&&meta.chartPreviousClose
+      ? ((meta.regularMarketPrice-meta.chartPreviousClose)/meta.chartPreviousClose*100)
+      : null
+  };
+}
 
 async function refreshPrices(){
   showRefreshSpinner(true);
   setDataBadge('Fetching…','#92400e');
-  try{
-    const tickers=PORT_TICKERS.join(',');
-    const data=await rateLimit(()=>_fetch('/v2/snapshot/locale/us/markets/stocks/tickers?tickers='+tickers+'&apiKey='+MASSIVE_API_KEY));
-    let n=0;
-    if(data&&data.tickers){
-      data.tickers.forEach(item=>{
-        const s=allStocks.find(x=>x.t===item.ticker);
-        if(s){
-          s.livePrice=(item.prevDay&&item.prevDay.c)?item.prevDay.c:null;
-          s.liveChgPct=(item.todaysChangePerc!==undefined)?item.todaysChangePerc:null;
-          s.liveLoaded=true;
-          if(s.livePrice)n++;
-        }
-      });
+  let n=0;
+  for(const ticker of PORT_TICKERS){
+    try{
+      const p=await fetchYahooPrice(ticker);
+      const s=allStocks.find(x=>x.t===ticker);
+      if(s&&p.close){
+        s.livePrice=p.close;
+        s.liveChgPct=p.chgPct;
+        s.liveLoaded=true;
+        n++;
+      }
+    }catch(e){
+      console.warn('Yahoo price failed for '+ticker+':',e.message);
     }
-    updateTimestamp();
-    if(n>0){setDataBadge('EOD · '+n+' prices loaded','#2d6a4f');}
-    else{setDataBadge('Connected · no data yet','#92400e');}
-    ra();
-  }catch(err){
-    console.error('Massive API error:',err);
-    setDataBadge('API error — see console','#9b2335');
+    await new Promise(r=>setTimeout(r,120));
   }
+  updateTimestamp();
+  setDataBadge(n>0?'EOD · '+n+' prices loaded':'Price fetch failed', n>0?'#2d6a4f':'#9b2335');
   showRefreshSpinner(false);
+  ra();
 }
 
 setTimeout(refreshPrices, 1000);
